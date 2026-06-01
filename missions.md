@@ -1,6 +1,6 @@
 
 
-## Phase 1 : Préparation des données (Milestone S4 - Arthur)
+[## Phase 1 : Préparation des données (Milestone S4 - Arthur)](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Arthur.md)
 
 Arthur est en charge de l'acquisition, du nettoyage et de la séparation des données (S4).
 
