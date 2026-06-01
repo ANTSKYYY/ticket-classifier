@@ -11,6 +11,7 @@ Notre projet porte sur la classification automatique de tickets de support clien
 * **Evan Tangatchy** (S14) : Évaluation finale, analyse qualitative des erreurs et création des supports de présentation.
 * **Enzo Dziewulski** (S15) : Préparation de la soutenance finale et structuration/finalisation de ce dépôt GitHub.
 
+[Voir les missions détaillées de chacuns](https://github.com/ANTSKYYY/deeplearning/blob/main/missions.md)
 ## 📝 Description du Problème
 
 Dans les grandes entreprises, les équipes de support perdent un temps précieux à trier manuellement les tickets entrants pour les rediriger vers les bons services (facturation, technique, etc.). Le tri humain ne passe pas à l'échelle et manque de cohérence, tandis que les systèmes à base de mots-clés échouent face à la complexité et l'ambiguïté du langage naturel.
