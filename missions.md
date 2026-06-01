@@ -10,6 +10,7 @@ Arthur est en charge de l'acquisition, du nettoyage et de la séparation des don
 * **Séparation :** Il faut créer une séparation stratifiée de 80/10/10 pour l'entraînement, la validation et les tests. La stratification est cruciale ici pour s'assurer que la petite classe (17%) soit bien représentée dans chaque sous-ensemble.
 
 ## Phase 2 : Modèle de Base / Baseline (Milestone S7 - Antoine)
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Antoine.md)
 
 Antoine est responsable de l'implémentation de la baseline (S7).
 
