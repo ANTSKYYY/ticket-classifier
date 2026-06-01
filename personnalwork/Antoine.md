@@ -104,3 +104,13 @@ D'après `reading-1-logistic-regression-as-a-neural-network-companion-to-d.md`, 
 
 * **Cible :** Comme défini dans le Proposal, l'objectif pour cette baseline est d'obtenir un **Macro F1-score situé entre 0.65 et 0.75**.
 * **Prochaine étape :** Une fois ce score obtenu, la valeur de la Baseline sera figée. Le jalon suivant (S11 - Arslan) consistera à appliquer un modèle de langage pré-entraîné (DistilBERT) pour extraire des embeddings contextuels (plutôt que les embeddings sparses du TF-IDF) afin d'essayer de battre cette limite et d'atteindre 0.80 - 0.88 de Macro F1-score.
+
+## 4. Analyse des Résultats de la Baseline
+
+Les résultats obtenus sur le set de test (Macro F1-score de 0.42) sont inférieurs à notre cible théorique (0.65 - 0.75). L'analyse du rapport de classification met en évidence une défaillance majeure :
+* **Incapacité à détecter la classe minoritaire :** Le modèle obtient un F1-score de 0.00 sur la classe `Product Support`. 
+* **Surapprentissage (Overfitting) :** L'écart important entre la validation (0.64) et le test (0.42) montre que l'approche TF-IDF peine à généraliser sur un si petit jeu de données (339 échantillons).
+
+**Conclusion S7 :** Cette baseline classique démontre que la simple occurrence de mots (TF-IDF) ne permet pas de capturer les nuances sémantiques nécessaires pour router des tickets ambigus, surtout pour des classes sous-représentées. Cela valide pleinement la nécessité de passer à la phase suivante (S11) : l'utilisation d'un modèle de langage contextuel pré-entraîné (DistilBERT) via Transfer Learning.
+
+[image](https://github.com/ANTSKYYY/deeplearning/blob/main/img/baseline_confusion_matrix.png)
