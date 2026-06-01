@@ -113,4 +113,4 @@ Les résultats obtenus sur le set de test (Macro F1-score de 0.42) sont inférie
 
 **Conclusion S7 :** Cette baseline classique démontre que la simple occurrence de mots (TF-IDF) ne permet pas de capturer les nuances sémantiques nécessaires pour router des tickets ambigus, surtout pour des classes sous-représentées. Cela valide pleinement la nécessité de passer à la phase suivante (S11) : l'utilisation d'un modèle de langage contextuel pré-entraîné (DistilBERT) via Transfer Learning.
 
-[image](https://github.com/ANTSKYYY/deeplearning/blob/main/img/baseline_confusion_matrix.png)
+[[image](https://github.com/ANTSKYYY/deeplearning/blob/main/img/baseline_confusion_matrix.png)](https://github.com/ANTSKYYY/deeplearning/blob/main/img/baseline_confusion_matrix.png)
