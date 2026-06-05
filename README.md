@@ -1,6 +1,6 @@
 # 🎫 Automatic Customer Support Ticket Routing
 
-🚀 **Testez notre modèle en direct : [Application Web Interactive (XAI)**](https://antskyyy.github.io/deeplearning/)
+🚀 Testez notre modèle en direct : [Application Web Interactive (XAI)**](https://antskyyy.github.io/deeplearning/)
 
 Notre projet porte sur la classification automatique de tickets de support client en utilisant des méthodes de Machine Learning classique et de Deep Learning. Face aux limites d'un jeu de données initial restreint, notre équipe a adopté une approche **Data-Centric** couplée à des techniques d'entraînement avancées (**Curriculum Learning & Adversarial Training**) pour atteindre des performances de niveau production.
 
