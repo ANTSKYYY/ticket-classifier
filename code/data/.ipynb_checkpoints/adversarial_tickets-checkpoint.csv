@@ -1,0 +1,41 @@
+text,label
+"I was trying to pay my monthly invoice but the checkout button gives me a 404 server error.",Support
+"Why does the payment page keep crashing every time I open my billing settings?",Support
+"I've been trying to update my credit card details for two hours and the form just keeps timing out!",Support
+"When navigating to billing settings and attempting to save a new payment method, the entire page throws a 500 internal server error and all my credit card details are wiped.",Support
+"The refund request button was broken after the latest deployment — no action is triggered upon clicking it.",Support
+"Checkout page won't load — just a blank white screen where the payment form should be.",Support
+"Your invoice download feature is completely broken — I've clicked it a dozen times and nothing ever happens!",Support
+"Has the billing module crashed again after the last update? I can no longer access any of my payment history.",Support
+"After a credit card was entered and the Pay button pressed, a CORS policy error is thrown and the transaction never completes.",Support
+"Is the billing API down? Getting a 503 on every single payment request I make.",Support
+"The payment modal crashes my browser tab every single time — tested on Chrome, Firefox and Safari, the credit card form refuses to render in any of them.",Support
+"Clicking on any invoice in my billing history triggers an unhandled JavaScript exception that freezes the entire dashboard until a hard refresh.",Support
+"Why is a 404 error appearing when I try to reach the Pay Now section from my subscription settings?",Support
+"Payment form is completely broken — cannot enter my credit card number anywhere on the checkout page.",Support
+"The spinner just keeps spinning on the payment confirmation screen and the charge never goes through — this bug needs immediate attention.",Support
+"My account was locked out of the billing portal due to a session timeout bug that fires every time I reach the payment page.",Support
+"After entering my credit card and CVV, the system hangs indefinitely and never returns a confirmation, a receipt or even an error message.",Support
+"The invoice page returns a database connection error every single time it is loaded.",Support
+"I cannot believe the Refund Status page has been throwing a 500 error for five straight days — fix this bug!",Support
+"Every time I navigate from the billing overview to an invoice detail, the whole app crashes and forces me to log back in.",Support
+"The system crashed right after I clicked submit — can you check if my credit card was charged twice?",Billing and Payments
+"Got a 500 error at checkout but my card was still charged — I need a refund immediately.",Billing and Payments
+"Your server went offline for three hours but apparently still processed my payment — I never authorized that charge!",Billing and Payments
+"Despite receiving a timeout error during subscription confirmation, I was billed for an annual plan I never intended to purchase.",Billing and Payments
+"A double charge was triggered by what appears to be a glitch during checkout — will this be refunded automatically?",Billing and Payments
+"Glitch charged me twice last week. I want my money back.",Billing and Payments
+"I cancelled my subscription and received a success notification, but a bug apparently prevented the cancellation from registering on your backend and I was charged again the following month.",Billing and Payments
+"The payment screen showed error code 422 — was my credit card actually charged or not?",Billing and Payments
+"My free trial was silently converted to a paid plan due to an error in your notification system and I was billed $99 without any consent.",Billing and Payments
+"After the system threw a critical error during my annual renewal I assumed no payment went through, but my bank statement clearly shows a $199 charge I want fully refunded.",Billing and Payments
+"Error 403 keeps appearing on the cancellation page yet the monthly charge still went through — completely unacceptable.",Billing and Payments
+"Your site crashed during Black Friday and charged me three times in a row — I want every duplicate charge reversed immediately!",Billing and Payments
+"A glitch in the promo code module resulted in my being billed at full price instead of the 40% discounted rate — I want the difference refunded.",Billing and Payments
+"The loading screen froze when I tried to cancel — was my subscription actually cancelled or will I be charged again next month?",Billing and Payments
+"App showed a network error during payment but my bank account was still debited — where is my refund?",Billing and Payments
+"I got a 503 service unavailable error when trying to downgrade my plan but was still billed at the premium tier price.",Billing and Payments
+"A race condition bug in your payment system processed my card twice within seconds — both charges appear on my bank statement and I want one reversed.",Billing and Payments
+"The subscription cancellation was flagged as 'error: unknown' in your system log yet $29.99 was still deducted from my account on the scheduled billing date.",Billing and Payments
+"A crash occurred right in the middle of my renewal — am I now being charged for two overlapping active subscriptions?",Billing and Payments
+"Your entire platform was offline for six hours on my renewal date, your system shows the renewal as failed, but my bank shows a pending charge of $149 — I need this resolved now!",Billing and Payments
