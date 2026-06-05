@@ -2,7 +2,7 @@
 
 ## Phase 1 : Préparation des données (Milestone S4 - Arthur)
 
-[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Arthur.md)
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/personnalwork/Arthur.md)
 
 Arthur est en charge de l'acquisition, du nettoyage et de la préparation des données (S4). L'ancien dataset (339 échantillons) a été remplacé par une base de données beaucoup plus robuste pour permettre un apprentissage profond efficace.
 
@@ -13,7 +13,7 @@ Arthur est en charge de l'acquisition, du nettoyage et de la préparation des do
 
 ## Phase 2 : Modèle de Base / Baseline (Milestone S7 - Antoine)
 
-[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Antoine.md)
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/personnalwork/Antoine.md)
 
 Antoine est responsable de l'implémentation de la baseline (S7) sur ce nouveau dataset élargi.
 
@@ -22,7 +22,7 @@ Antoine est responsable de l'implémentation de la baseline (S7) sur ce nouveau 
 
 ## Phase 3 : Modèle Deep Learning Avancé (Milestone S11 - Arslan)
 
-[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Arslan.md)
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/personnalwork/Arslan.md)
 
 Arslan a entièrement repensé l'approche Deep Learning avec un pipeline DistilBERT intégrant de l'**Adversarial Training** et du **Curriculum Learning** (S11).
 
@@ -36,7 +36,7 @@ Arslan a entièrement repensé l'approche Deep Learning avec un pipeline DistilB
 
 ## Phase 4 : Évaluation et Analyse des erreurs (Milestone S14 - Evan)
 
-[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Evan.md)
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/personnalwork/Evan.md)
 
 Evan est en charge de l'évaluation finale et de l'analyse des erreurs générées par le nouveau pipeline (S14).
 
@@ -45,7 +45,7 @@ Evan est en charge de l'évaluation finale et de l'analyse des erreurs généré
 
 ## Phase 5 : Gestion des risques et Défense finale (Milestone S15 - Enzo)
 
-[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Enzo.md)
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/personnalwork/Enzo.md)
 
 Enzo est responsable de la préparation de la soutenance et de la finalisation du dépôt (S15), avec de nouveaux arguments liés aux modifications d'Arslan et Arthur.
 
