@@ -1,142 +1,244 @@
-
-# 🚀 Milestone S11 : Modèle Profond (Deep Learning) - Fine-tuning de DistilBERT
+# 🚀 Milestone S11 : Modèle Profond (Deep Learning) - Fine-tuning Avancé de DistilBERT
 
 **Responsable :** Arslan Tetu
 
-**Objectif :** Entraîner (fine-tuner) le modèle `distilbert-base-uncased` pour surpasser les limites de la baseline classique (Macro F1 de 0.42) et résoudre l'incapacité du modèle précédent à détecter la classe minoritaire "Product Support".
-**Prérequis :** Fichiers `train.csv` (80%), `val.csv` (10%), et `test.csv` (10%) générés par Arthur (S4).
+**Objectif :** Entraîner (fine-tuner) le modèle `distilbert-base-uncased` via une architecture d'entraînement avancée (Curriculum Learning + Adversarial Training) pour surpasser la baseline classique et garantir la robustesse du modèle face aux données ambiguës.
+**Prérequis :** Fichiers purifiés `train_augmented.csv`, `val.csv`, et `test.csv` générés par le pipeline Data-Centric (S4).
 
 ## 1. Argumentation Théorique (Lien avec le cours DL2026)
 
-Avant de passer à l'implémentation, il est essentiel de justifier nos choix architecturaux à la lumière du cours.
+L'implémentation de ce pipeline repose sur plusieurs concepts théoriques majeurs abordés dans le cours.
 
 ### A. Modélisation de Séquences et choix du Transformer
 
-La baseline TF-IDF de la Phase 2 (S7) a échoué car elle traite le texte comme un "sac de mots" (bag-of-words), détruisant l'ordre et le contexte. D'après le fichier `reading-1-companion-notes-for-goodfellow-ch-10-sequence-modeling.md`, traiter des données temporelles ou ordonnées comme le texte nécessite un modèle capable de comprendre les dépendances séquentielles.
-Si historiquement les Réseaux de Neurones Récurrents (RNNs) étaient la norme, le cours souligne que l'architecture **Transformer** a remplacé les RNNs en NLP. En supprimant la contrainte de récurrence grâce au mécanisme d'attention, le Transformer élimine le "goulot d'étranglement" (bottleneck) de l'encodeur. `DistilBERT` est une version compressée de cette architecture, idéale pour notre petit dataset de 339 échantillons.
+Contrairement à la baseline TF-IDF qui traite le texte comme un "sac de mots", détruisant le contexte, l'architecture **Transformer** comprend les dépendances séquentielles grâce au mécanisme d'attention (cf. `reading-1-companion-notes-for-goodfellow-ch-10-sequence-modeling.md`). `DistilBERT` est une version compressée idéale pour notre cas d'usage, permettant un Transfer Learning efficace.
 
-### B. Mathématiques de la classification : Softmax et Log-Loss (Cross-Entropy)
+### B. Mathématiques : Softmax et Cross-Entropy Pondérée
 
-Notre modèle utilise une tokenisation par sous-mots (WordPiece). L'embedding contextuel du token `[CLS]` (qui agrège le sens de la séquence) est passé dans une couche de classification linéaire suivie d'une fonction **Softmax**.
+L'embedding contextuel du token `[CLS]` est passé dans une couche linéaire suivie d'un **Softmax**. Comme vu dans `reading-2-sigmoid-softmax-and-log-loss-full-derivations.md`, la minimisation de la *Categorical Cross-Entropy* garantit un gradient stable ($\frac{\partial L}{\partial z} = a - y$).
+Cependant, pour contrer le déséquilibre des classes restant, nous utilisons une fonction de perte personnalisée (`WeightedTrainer`) qui injecte des poids mathématiques calculés dynamiquement directement dans la fonction de perte.
 
-* **Pourquoi Softmax ?** D'après `reading-2-sigmoid-softmax-and-log-loss-full-derivations.md`, Softmax est la généralisation de la fonction Sigmoid pour $K \ge 2$ classes mutuellement exclusives. Elle garantit que la somme des probabilités des 3 classes vaut 1.
-* **Pourquoi la Categorical Cross-Entropy ?** Le cours démontre que minimiser l'entropie croisée catégorielle équivaut à maximiser la vraisemblance (Maximum Likelihood) sous un modèle catégoriel. Surtout, la dérivation mathématique de la perte combinée au Softmax produit un gradient d'une élégance absolue : $\frac{\partial L}{\partial z} = a - y$. Cette simplification mathématique évite la saturation et rend la rétropropagation (backpropagation) extrêmement stable et efficace.
+### C. Curriculum Learning & Adversarial Training
 
-## 2. Pipeline de Fine-tuning DistilBERT (Code Python)
+Pour rendre le modèle robuste sans détruire ses apprentissages, l'entraînement est scindé en deux phases :
 
-Le script suivant implémente l'entraînement. Il respecte à la lettre les spécifications de notre proposition (Proposal).
+1. **Phase 1 (Apprentissage standard) :** Le modèle apprend à construire ses représentations sémantiques sur des données "faciles" et propres.
+2. **Phase 2 (Adversarial Training) :** Injection de données "difficiles" (bruitées, ambiguës) avec un ratio de 1:3. Pour éviter **l'oubli catastrophique** (*catastrophic forgetting*) des patterns appris en Phase 1, le taux d'apprentissage (learning rate) est drastiquement réduit (de 1.5e-5 à 5e-6).
+
+## 2. Configuration de l'Environnement (Prévention des erreurs)
+
+Avant de lancer le pipeline, nous avons mis en place une configuration stricte des variables d'environnement pour forcer la gestion locale du cache et éviter les erreurs de permission (Token bloquant) très fréquentes avec l'API Hugging Face.
 
 ```python
-# src/train_distilbert.py
-import pandas as pd
-import torch
-from datasets import Dataset
-from transformers import (
-    AutoTokenizer, 
-    AutoModelForSequenceClassification, 
-    TrainingArguments, 
-    Trainer
-)
-from sklearn.metrics import f1_score, accuracy_score
+import os
 
-# ==========================================
-# 1. PRÉPARATION DES DONNÉES
-# ==========================================
-print("Chargement des données S4...")
-train_df = pd.read_csv('data/train.csv')
-val_df = pd.read_csv('data/val.csv')
-test_df = pd.read_csv('data/test.csv')
+# 1. Force Hugging Face à télécharger dans le projet (évite de saturer le disque global)
+os.environ["HF_HOME"] = "./hf_cache"
 
-# Mapping des labels en entiers pour PyTorch
-label_mapping = {"Other": 0, "Product Support": 1, "Technical Support": 2}
-for df in [train_df, val_df, test_df]:
-    df['label'] = df['label'].map(label_mapping)
+# 2. Force Hugging Face à ignorer le fichier de token local (qui bloque souvent l'accès)
+os.environ["HF_HUB_DISABLE_TOKEN"] = "1"
 
-# Conversion en objets HuggingFace Dataset
-train_dataset = Dataset.from_pandas(train_df)
-val_dataset = Dataset.from_pandas(val_df)
-test_dataset = Dataset.from_pandas(test_df)
+print("Dossier de cache configuré sur :", os.environ["HF_HOME"])
+print("Vérification du token désactivée pour éviter l'erreur de permission.")
 
-# ==========================================
-# 2. TOKENIZATION (WordPiece)
-# ==========================================
-print("Tokenisation avec distilbert-base-uncased...")
-model_name = "distilbert-base-uncased"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-def tokenize_function(examples):
-    # Padding et troncature pour uniformiser la taille des séquences
-    return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=128)
-
-train_tokenized = train_dataset.map(tokenize_function, batched=True)
-val_tokenized = val_dataset.map(tokenize_function, batched=True)
-test_tokenized = test_dataset.map(tokenize_function, batched=True)
-
-# ==========================================
-# 3. INITIALISATION DU MODÈLE
-# ==========================================
-print("Initialisation du modèle de classification...")
-# Le modèle ajoute automatiquement la couche linéaire et la perte Cross-Entropy (log-loss)
-model = AutoModelForSequenceClassification.from_pretrained(
-    model_name, 
-    num_labels=3
-)
-
-# Fonction de calcul des métriques
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = torch.argmax(torch.tensor(logits), dim=-1).numpy()
-    
-    macro_f1 = f1_score(labels, predictions, average='macro')
-    acc = accuracy_score(labels, predictions)
-    return {"macro_f1": macro_f1, "accuracy": acc}
-
-# ==========================================
-# 4. HYPERPARAMÈTRES ET ENTRAÎNEMENT
-# ==========================================
-print("Configuration des hyperparamètres...")
-# Hyperparamètres stricts basés sur la proposition du projet
-training_args = TrainingArguments(
-    output_dir="./results",
-    evaluation_strategy="epoch",      # Évaluation à la fin de chaque époque
-    save_strategy="epoch",
-    learning_rate=3e-5,               # Dans la fourchette recommandée [2e-5, 5e-5]
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
-    num_train_epochs=5,               # Arrêt précoce possible si validation stagne
-    weight_decay=0.01,                # AdamW : régularisation pour limiter l'overfitting
-    warmup_steps=50,                  # Scheduler linéaire avec warmup
-    load_best_model_at_end=True,      # Conserve le meilleur modèle basé sur la validation
-    metric_for_best_model="macro_f1"
-)
-
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=train_tokenized,
-    eval_dataset=val_tokenized,
-    compute_metrics=compute_metrics,
-)
-
-print("Début de l'entraînement (Fine-Tuning)...")
-trainer.train()
-
-# ==========================================
-# 5. ÉVALUATION FINALE SUR LE SET DE TEST
-# ==========================================
-print("\n--- ÉVALUATION SUR LE SET DE TEST ---")
-test_results = trainer.evaluate(test_tokenized)
-print(f"Test Macro F1-score: {test_results['eval_macro_f1']:.4f}")
-print(f"Test Accuracy: {test_results['eval_accuracy']:.4f}")
-
-# Sauvegarde du modèle final
-trainer.save_model("./distilbert-ticket-classifier")
-print("Modèle sauvegardé dans le dossier './distilbert-ticket-classifier'")
+# Optimisations matérielles
+os.environ["TOKENIZERS_PARALLELISM"]      = "false"
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 ```
 
-## 3. Objectifs et Attentes
+## 3. Pipeline de Fine-tuning DistilBERT (Code Python)
 
-* **Cible (Macro F1) :** L'objectif de ce fine-tuning est d'atteindre un Macro F1-score compris entre **0.80 et 0.88**.
-* **Résolution de la faille de la Baseline :** Lors du jalon S7, la régression logistique a obtenu un score de 0.00 sur la classe "Product Support". Grâce au **Transfer Learning**, DistilBERT possède déjà une compréhension riche de la langue anglaise. Le modèle ne cherchera pas de correspondances exactes de mots isolés, mais "l'intention sémantique" agrégée dans le token `[CLS]`. Nous nous attendons donc à ce que le score de la classe minoritaire décolle significativement.
-* **Prochaine étape (S14 - Evan) :** Dès que l'entraînement est terminé et le modèle sauvegardé, Evan prendra le relais pour analyser qualitativement les nouvelles prédictions, générer la matrice de confusion finale et inspecter manuellement les erreurs restantes.
+Voici l'implémentation complète du pipeline à deux phases, incluant la surcharge de la fonction de perte et l'injection de la donnée adversariale.
+
+```python
+# src/train_distilbert_curriculum.py
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import re
+import warnings
+warnings.filterwarnings("ignore")
+
+if hasattr(torch.backends, "mps"):
+    torch.backends.mps.is_available = lambda: False
+
+from datasets import Dataset
+from transformers import (
+    DistilBertTokenizerFast,
+    DistilBertForSequenceClassification,
+    Trainer,
+    TrainingArguments,
+    EarlyStoppingCallback,
+)
+from sklearn.metrics import f1_score, accuracy_score, classification_report
+from sklearn.utils.class_weight import compute_class_weight
+
+SEED = 42
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+
+DEVICE = torch.device("cpu")
+
+
+# 1. WeightedTrainer PARAMÉTRISÉ (Gestion du déséquilibre)
+
+class WeightedTrainer(Trainer):
+   
+    def __init__(self, *args, class_weights: torch.Tensor = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.class_weights = class_weights 
+
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+        labels  = inputs.pop("labels")
+        outputs = model(**inputs)
+        logits  = outputs.logits
+        loss    = nn.CrossEntropyLoss(weight=self.class_weights)(logits, labels)
+        return (loss, outputs) if return_outputs else loss
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    preds = np.argmax(logits, axis=-1)
+    return {
+        "macro_f1": f1_score(labels, preds, average="macro"),
+        "accuracy": accuracy_score(labels, preds),
+    }
+
+# 2. CHARGEMENT ET NETTOYAGE DES DONNÉES
+
+print("\nChargement des données...")
+train_df = pd.read_csv('data/train_augmented.csv')
+val_df   = pd.read_csv('data/val.csv')
+test_df  = pd.read_csv('data/test.csv')
+
+TARGET_COL = 'queue' if 'queue' in train_df.columns else 'label'
+
+# Undersampling classe majoritaire
+df_support  = train_df[train_df[TARGET_COL] == 'Support']
+df_customer = train_df[train_df[TARGET_COL] == 'Customer Service']
+df_billing  = train_df[train_df[TARGET_COL] == 'Billing and Payments']
+
+if len(df_support) > 2000:
+    df_support = df_support.sample(n=2000, random_state=SEED)
+    train_df   = pd.concat([df_support, df_customer, df_billing]).sample(frac=1, random_state=SEED).reset_index(drop=True)
+
+# Regex de nettoyage avancées 
+GREETINGS_RE   = re.compile(r'^(hello|hi|dear customer|hey)[,\s]+', flags=re.IGNORECASE)
+SIGNATURE_RE   = re.compile(r'(sincerely|best regards|warm regards|thank you for your time).*', flags=re.IGNORECASE | re.DOTALL)
+SOFTWARE_RE    = re.compile(r'\b(microsoft dynamics 365|laravel 8|node\.js|elasticsearch|avid pro tools|microsoft office 2021|hadoop|davinci resolve|asana)\b', flags=re.IGNORECASE)
+
+def clean_text_bert(text: str) -> str:
+    if not isinstance(text, str): return ""
+    text = text.lower()
+    text = GREETINGS_RE.sub('', text)
+    text = SIGNATURE_RE.sub('', text)
+    text = SOFTWARE_RE.sub('SOFTWARE_PRODUCT', text)
+    return re.sub(r'\s+', ' ', text).strip()
+
+label_mapping = {"Support": 0, "Feature Request": 1, "Billing and Payments": 2}
+
+def apply_cleaning(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df['text'] = df['text'].apply(clean_text_bert)
+    col = 'queue' if 'queue' in df.columns else 'label'
+    df['label'] = df[col].map(label_mapping)
+    df.dropna(subset=['text', 'label'], inplace=True)
+    df['label'] = df['label'].astype(int)
+    return df[df['text'].str.split().str.len() > 2].reset_index(drop=True)
+
+train_df = apply_cleaning(train_df)
+val_df   = apply_cleaning(val_df)
+test_df  = apply_cleaning(test_df)
+
+# 3. ADVERSARIAL DATA — Injection (Ratio 1:3)
+
+print("\nChargement des adversarial examples...")
+adv_df = apply_cleaning(pd.read_csv('data/adversarial_tickets.csv'))
+
+# Oversampling pour atteindre la cible 
+n_adv_target    = len(train_df) // 3
+adv_oversampled = adv_df.sample(n=n_adv_target, replace=True, random_state=SEED)
+
+# Création des deux corpus pour le Curriculum Learning
+train_df_normal = train_df.copy()  # Phase 1 : données faciles
+train_df_full   = pd.concat([train_df, adv_oversampled]).sample(frac=1, random_state=SEED).reset_index(drop=True) # Phase 2
+
+
+# 4. TOKENISATION
+MODEL_NAME = "distilbert-base-uncased"
+tokenizer = DistilBertTokenizerFast.from_pretrained(MODEL_NAME)
+
+def make_hf_dataset(df: pd.DataFrame) -> Dataset:
+    ds = Dataset.from_pandas(df[['text', 'label']], preserve_index=False).map(
+        lambda b: tokenizer(b['text'], padding='max_length', truncation=True, max_length=128), batched=True
+    ).rename_column('label', 'labels')
+    ds.set_format('torch', columns=['input_ids', 'attention_mask', 'labels'])
+    return ds
+
+train_dataset_normal = make_hf_dataset(train_df_normal)
+train_dataset_full   = make_hf_dataset(train_df_full)
+val_dataset          = make_hf_dataset(val_df)
+test_dataset         = make_hf_dataset(test_df)
+
+model = DistilBertForSequenceClassification.from_pretrained(
+    MODEL_NAME, num_labels=3, id2label={v: k for k, v in label_mapping.items()}, label2id=label_mapping
+).to(DEVICE)
+
+# 5. CURRICULUM LEARNING — PHASE 1
+print("\nCURRICULUM — PHASE 1 : Données normales (faciles)")
+cw_normal = compute_class_weight('balanced', classes=np.array([0, 1, 2]), y=train_df_normal['label'].values)
+cw_normal_tensor = torch.tensor(cw_normal, dtype=torch.float).to(DEVICE)
+
+args_phase1 = TrainingArguments(
+    output_dir="./curriculum-phase1", num_train_epochs=2, per_device_train_batch_size=16,
+    learning_rate=1.5e-5, weight_decay=0.05, warmup_ratio=0.1,
+    eval_strategy="epoch", save_strategy="epoch", load_best_model_at_end=True,
+    metric_for_best_model="macro_f1", use_cpu=True, report_to="none"
+)
+
+trainer_phase1 = WeightedTrainer(
+    model=model, args=args_phase1, train_dataset=train_dataset_normal, eval_dataset=val_dataset,
+    compute_metrics=compute_metrics, class_weights=cw_normal_tensor,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]
+)
+trainer_phase1.train()
+trainer_phase1.save_model("./curriculum-phase1-best")
+
+
+# 6. CURRICULUM LEARNING — PHASE 2 (Normal + Adversarial)
+
+print("\nCURRICULUM — PHASE 2 : + Adversarial examples (durs)")
+cw_full = compute_class_weight('balanced', classes=np.array([0, 1, 2]), y=train_df_full['label'].values)
+cw_full_tensor = torch.tensor(cw_full, dtype=torch.float).to(DEVICE)
+
+args_phase2 = TrainingArguments(
+    output_dir="./curriculum-phase2-final", num_train_epochs=2, per_device_train_batch_size=16,
+    learning_rate=5e-6, # LR réduit pour éviter le catastrophic forgetting
+    weight_decay=0.05, warmup_ratio=0.05,
+    eval_strategy="epoch", save_strategy="epoch", load_best_model_at_end=True,
+    metric_for_best_model="macro_f1", use_cpu=True, report_to="none"
+)
+
+trainer_phase2 = WeightedTrainer(
+    model=model, args=args_phase2, train_dataset=train_dataset_full, eval_dataset=val_dataset,
+    compute_metrics=compute_metrics, class_weights=cw_full_tensor,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]
+)
+trainer_phase2.train()
+
+# 7. ÉVALUATION FINALE
+test_output = trainer_phase2.predict(test_dataset)
+pred_labels = np.argmax(test_output.predictions, axis=-1)
+true_labels = test_output.label_ids
+
+print(f"\nMacro F1-score : {f1_score(true_labels, pred_labels, average='macro'):.4f}")
+print(classification_report(true_labels, pred_labels, target_names=list(label_mapping.keys())))
+
+```
+
+## 4. Objectifs et Attentes
+
+* **Robustesse accrue :** L'objectif de ce fine-tuning par Curriculum Learning est d'apprendre au modèle à ne pas sur-réagir à du vocabulaire trompeur (géré par la Phase 2 avec les données adversariales).
+* **Résolution de la faille de la Baseline :** Le calcul de poids personnalisé via le `WeightedTrainer` permet de pénaliser beaucoup plus lourdement les erreurs sur la classe minoritaire (*Feature Request* / *Product Support*) et de ne pas la sacrifier au profit de la classe majoritaire.
+* **Prochaine étape (S14 - Evan) :** Une fois le modèle `curriculum-phase2-final` exporté, Evan génèrera la matrice de confusion et l'extraction des derniers faux positifs restants afin d'en comprendre l'origine sémantique.
