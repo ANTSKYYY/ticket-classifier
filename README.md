@@ -10,7 +10,7 @@ Notre projet porte sur la classification automatique de tickets de support clien
 * **Evan Tangatchy (S14) :** Évaluation finale du pipeline, extraction des métriques et analyse qualitative des erreurs résiduelles (chevauchement sémantique).
 * **Enzo Dziewulski (S15) :** Préparation de la soutenance finale, défense des choix architecturaux et structuration globale du dépôt GitHub.
 
-🔗 [Voir les journaux de bord et missions détaillées de chacun](https://github.com/ANTSKYYY/deeplearning/blob/main/missions.md)
+🔗 [Voir les journaux de bord et missions détaillées de chacun](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/missions.md)
 
 ## 📝 Description du Problème
 
