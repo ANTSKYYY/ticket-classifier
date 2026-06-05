@@ -1,43 +1,48 @@
 
 
 ## Phase 1 : Préparation des données (Milestone S4 - Arthur)
+
 [Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Arthur.md)
 
-Arthur est en charge de l'acquisition, du nettoyage et de la séparation des données (S4).
+Arthur est en charge de l'acquisition, du nettoyage et de la préparation des données (S4). L'ancien dataset (339 échantillons) a été remplacé par une base de données beaucoup plus robuste pour permettre un apprentissage profond efficace.
 
-* **Le jeu de données :** Il provient de Kaggle et contient 339 échantillons de messages de support client.
-* **Déséquilibre des classes :** Le dataset est composé de 38% de support technique, 17% de support produit, et 45% pour la catégorie "Autre".
-* **Séparation :** Il faut créer une séparation stratifiée de 80/10/10 pour l'entraînement, la validation et les tests. La stratification est cruciale ici pour s'assurer que la petite classe (17%) soit bien représentée dans chaque sous-ensemble.
+* **Le jeu de données :** Il contient désormais environ 4 000 échantillons de tickets clients [Dataset](https://www.kaggle.com/datasets/tobiasbueck/multilingual-customer-support-tickets).
+* **Classes et distribution :** Le dataset se divise en trois catégories : *Support*, *Feature Request*, et *Billing and Payments*.
+* **Équilibrage (Undersampling) :** Pour éviter un biais massif, la classe majoritaire (*Support*) est plafonnée à 2000 échantillons maximum avant d'être mélangée aux autres classes.
+* **Nettoyage avancé :** Application d'un pipeline Regex (`clean_text_bert`) pour standardiser les salutations, signatures, versions et noms de logiciels spécifiques (ex: remplacement par des tokens génériques comme `SOFTWARE_PRODUCT`).
 
 ## Phase 2 : Modèle de Base / Baseline (Milestone S7 - Antoine)
+
 [Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Antoine.md)
 
-Antoine est responsable de l'implémentation de la baseline (S7).
+Antoine est responsable de l'implémentation de la baseline (S7) sur ce nouveau dataset élargi.
 
 * **Architecture :** Le modèle de base utilise une vectorisation TF-IDF combinée à une régression logistique.
-* **Lien avec le cours :** Pour bien argumenter cette partie dans le rapport final, vous pouvez vous appuyer sur les fichiers `reading-1-logistic-regression-as-a-neural-network-companion-to-d.md` et `reading-2-deep-learning-vs-classical-machine-learning.md` présents dans votre GitHub. Cela vous aidera à expliquer théoriquement la différence entre les représentations lexicales éparses (TF-IDF) et la classification linéaire face aux réseaux de neurones profonds.
-* **Objectif :** Atteindre un Macro F1-score d'environ 0.65 à 0.75.
+* **Objectif :** Établir un score de référence (Macro F1-score) sur le nouveau corpus de 4K données avant de passer au Deep Learning.
 
-## Phase 3 : Modèle Deep Learning (Milestone S11 - Arslan)
+## Phase 3 : Modèle Deep Learning Avancé (Milestone S11 - Arslan)
 
-Arslan doit réaliser le fine-tuning du modèle DistilBERT (S11).
+Arslan a entièrement repensé l'approche Deep Learning avec un pipeline DistilBERT intégrant de l'**Adversarial Training** et du **Curriculum Learning** (S11).
 
-* **Architecture :** Vous allez utiliser `distilbert-base-uncased` via Hugging Face. Le modèle prendra les tickets tokenisés (WordPiece), et l'embedding contextuel du token `[CLS]` sera passé dans une couche de classification linéaire suivie d'une fonction softmax.
-* **Lien avec le cours :** Référez-vous au fichier `reading-1-companion-notes-for-goodfellow-ch-10-sequence-modeling.md` pour maîtriser la théorie de la modélisation de séquences. De plus, le fichier `reading-2-sigmoid-softmax-and-log-loss-full-derivations.md` sera essentiel pour bien comprendre et justifier mathématiquement l'utilisation du softmax et de la perte logistique (log-loss/cross-entropy).
-* **Hyperparamètres :** Utilisez l'optimiseur AdamW avec un taux d'apprentissage (learning rate) compris entre 2e-5 et 5e-5, un scheduler linéaire et des étapes de warmup. La fonction de perte sera la cross-entropy.
-* **Objectif :** Surpasser la baseline et atteindre un Macro F1-score entre 0.80 et 0.88.
+* **Architecture & Curriculum Learning :** Le fine-tuning de `distilbert-base-uncased` se fait désormais en deux étapes progressives :
+* **Phase 1 (Données normales / faciles) :** Le modèle apprend à construire des représentations sémantiques solides sur le dataset propre (LR = 1.5e-5, 2 epochs).
+* **Phase 2 (Données difficiles / Adversarial) :** Injection d'exemples adversariaux (oversamplés pour atteindre un ratio de 1:3, soit 25% du dataset augmenté). Le taux d'apprentissage est drastiquement réduit (LR = 5e-6) pour ajuster les frontières de décision ambiguës sans provoquer d'oubli catastrophique (*catastrophic forgetting*) des acquis de la Phase 1.
+
+
+* **Gestion du déséquilibre (WeightedTrainer) :** Création d'une classe d'entraînement personnalisée injectant des poids de classes (`class_weights`) dynamiques directement dans la fonction de perte Cross-Entropy.
+
 
 ## Phase 4 : Évaluation et Analyse des erreurs (Milestone S14 - Evan)
 
-Evan est en charge de l'évaluation finale et de l'analyse des erreurs (S14).
+Evan est en charge de l'évaluation finale et de l'analyse des erreurs générées par le nouveau pipeline (S14).
 
-* **Métriques :** La métrique principale est le Macro F1-score, avec une cible de $\ge0.82$, ce qui permet de donner une importance égale à toutes les classes malgré le déséquilibre. Les métriques secondaires incluent l'accuracy globale et les F1-scores par classe.
-* **Analyse qualitative :** Il faudra générer une matrice de confusion et inspecter manuellement un échantillon de tickets mal classifiés. L'objectif est d'identifier les schémas d'erreur (ex: intentions ambiguës, messages trop courts, chevauchement entre "Support technique" et "Autre") entre la baseline et DistilBERT.
+* **Métriques :** La métrique principale reste le Macro F1-score, qui valide l'efficacité du `WeightedTrainer` sur les classes minoritaires. Les métriques secondaires incluent l'accuracy globale.
+* **Analyse qualitative :** Il faudra générer la matrice de confusion finale. L'enjeu sera de vérifier si le modèle de la Phase 2 (Adversarial) résiste mieux aux faux positifs et aux intentions ambiguës par rapport au modèle de la Phase 1 ou à la baseline TF-IDF.
 
 ## Phase 5 : Gestion des risques et Défense finale (Milestone S15 - Enzo)
 
-Enzo est responsable de la préparation de la soutenance et de la finalisation du dépôt (S15).
+Enzo est responsable de la préparation de la soutenance et de la finalisation du dépôt (S15), avec de nouveaux arguments liés aux modifications d'Arslan et Arthur.
 
-* **Mitigation des risques liés aux données :** La petite taille du dataset (339 échantillons) risque de provoquer du surapprentissage (overfitting). Pour contrer cela, appliquez une forte régularisation (dropout) et un arrêt précoce (early stopping) basé sur la validation.
-* **Mitigation du déséquilibre :** Pour éviter que le modèle ne prédise majoritairement la classe "Autre", assurez-vous d'utiliser une perte pondérée par classe (class-weighted loss) lors de l'entraînement.
-* **Lien avec le cours pour la présentation :** Pour structurer la présentation finale et les diapositives, vous pouvez vous inspirer des ressources du GitHub, notamment le fichier `reading-3-skim-guide-three-illustrative-prior-year-project-poste.md` qui montre des exemples de projets des années précédentes, ainsi que `reading-3-how-to-draft-a-feasible-project-proposal.md` pour vous assurer que les conclusions répondent bien aux critères d'un projet réalisable.
+* **Mitigation des risques de données :** Le problème initial (dataset trop petit avec 339 échantillons) a été résolu par l'acquisition du nouveau dataset de 4000 lignes.
+* **Mitigation de la fragilité du modèle :** La vulnérabilité habituelle des modèles NLP aux attaques ou au bruit est directement contrée par la **Phase 2 (Adversarial Training)** du pipeline d'Arslan.
+* **Mitigation du déséquilibre et de l'oubli :** Le risque de prédire uniquement la classe majoritaire est géré mathématiquement par l'injection de poids (`WeightedTrainer`). Le risque de *catastrophic forgetting* lors de la phase 2 est géré par la réduction du *learning rate*.
