@@ -22,6 +22,8 @@ Antoine est responsable de l'implémentation de la baseline (S7) sur ce nouveau 
 
 ## Phase 3 : Modèle Deep Learning Avancé (Milestone S11 - Arslan)
 
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Arslan.md)
+
 Arslan a entièrement repensé l'approche Deep Learning avec un pipeline DistilBERT intégrant de l'**Adversarial Training** et du **Curriculum Learning** (S11).
 
 * **Architecture & Curriculum Learning :** Le fine-tuning de `distilbert-base-uncased` se fait désormais en deux étapes progressives :
@@ -34,12 +36,16 @@ Arslan a entièrement repensé l'approche Deep Learning avec un pipeline DistilB
 
 ## Phase 4 : Évaluation et Analyse des erreurs (Milestone S14 - Evan)
 
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Evan.md)
+
 Evan est en charge de l'évaluation finale et de l'analyse des erreurs générées par le nouveau pipeline (S14).
 
 * **Métriques :** La métrique principale reste le Macro F1-score, qui valide l'efficacité du `WeightedTrainer` sur les classes minoritaires. Les métriques secondaires incluent l'accuracy globale.
 * **Analyse qualitative :** Il faudra générer la matrice de confusion finale. L'enjeu sera de vérifier si le modèle de la Phase 2 (Adversarial) résiste mieux aux faux positifs et aux intentions ambiguës par rapport au modèle de la Phase 1 ou à la baseline TF-IDF.
 
 ## Phase 5 : Gestion des risques et Défense finale (Milestone S15 - Enzo)
+
+[Travail détaillé](https://github.com/ANTSKYYY/deeplearning/blob/main/personnalwork/Enzo.md)
 
 Enzo est responsable de la préparation de la soutenance et de la finalisation du dépôt (S15), avec de nouveaux arguments liés aux modifications d'Arslan et Arthur.
 
