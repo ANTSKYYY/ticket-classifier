@@ -1,117 +1,115 @@
-# 📊 Milestone S4 : Préparation des Données et Analyse Exploratoire (EDA)
+# 📊 Milestone S4 : Préparation des Données et Approche Data-Centric
 
 **Responsable :** Arthur Le Coroller
+**Objectif :** Acquérir, nettoyer, augmenter et purifier le jeu de données pour garantir le succès des modèles de Machine Learning (Baseline) et de Deep Learning (DistilBERT), en appliquant les principes d'ingénierie des données vus dans le cours DL2026.
 
-**Objectif :** Acquérir, nettoyer et préparer le jeu de données pour les modèles de Machine Learning (Baseline) et de Deep Learning (DistilBERT), en respectant les principes d'ingénierie des données vus dans le cours DL2026.
+## 1. Contexte et Problématique Initiale
 
-## 1. Description du Jeu de Données
+Lors de la phase d'exploration initiale, notre jeu de données original (Kaggle) ne contenait qu'environ 339 échantillons. Les premiers tests d'entraînement montraient que les modèles plafonnaient à une précision d'environ 50%, même avec des architectures avancées comme DistilBERT.
 
-Le jeu de données `customer_tickets.csv` provient de Kaggle. Il contient des messages de support client en langage naturel (colonne `body`) et la catégorie de routage associée (colonne `queue`).
+Des audits approfondis des données ont révélé que le problème ne venait pas des modèles, mais de la **vérité terrain** :
 
-**Problématique soulevée par les données brutes :**
+* Volume de données largement insuffisant pour du Deep Learning.
+* Bruit important dans les textes bruts.
+* Déséquilibre critique des classes.
+* Erreurs humaines fréquentes dans l'étiquetage d'origine.
 
-* Le dataset original contient potentiellement plusieurs sous-catégories (IT Support, Customer Service, etc.).
-* Il comporte des balises HTML (ex: `<br>`) et des balises d'anonymisation (ex: `<name>`, `<tel_num>`).
-* **Déséquilibre des classes :** Conformément à notre proposition, nous visons une répartition ciblée : Support Technique (38%), Support Produit (17%), et Autre (45%).
+J'ai donc décidé de pivoter vers une approche **Data-Centric**, en considérant que l'optimisation de la donnée était prioritaire sur l'optimisation de l'algorithme.
 
-## 2. Pipeline de Nettoyage et de Séparation (Code Python)
+## 2. Pipeline Data-Centric (Méthodologie et Code)
 
-Voici le script utilisé pour préparer les données. Ce code utilise `pandas` pour la manipulation des données et `scikit-learn` pour la séparation stratifiée.
+Pour résoudre ces problèmes, j'ai mis en place un pipeline de traitement en quatre grandes étapes.
+
+### Étape 1 : Augmentation des Données et Fusion
+
+Pour pallier le manque de volume, le corpus a été étendu à plus de 4 000 échantillons. **Il est important de préciser que la très grande majorité de ces données provient directement du dataset Kaggle et est composée de tickets réels (non synthétiques).** Cependant, la classe *Feature Request* était en sous-effectif critique. Pour combler ce vide spécifique, des tickets ont été générés par IA (Gemini) en se basant strictement sur des modèles de tickets déjà existants. **Seule la catégorie des demandes de fonctionnalités a fait l'objet d'une augmentation synthétique.** L'ensemble a ensuite été fusionné et brassé (*shuffle*) pour éviter tout biais d'ordre d'apprentissage.
 
 ```python
 import pandas as pd
+
+# Chargement du dataset réel (Kaggle) et du dataset synthétique ciblé
+df_ancien = pd.read_csv('data/new/data4.csv') # Données 100% réelles
+df_nouveau = pd.read_csv('data/new/synthetic_feature_requests_gemini.csv') # Uniquement Feature Requests
+
+# Uniformisation des colonnes et nettoyage des valeurs nulles
+df_ancien = df_ancien[['queue', 'body']].rename(columns={'text': 'body', 'label': 'queue'}, errors='ignore')
+df_nouveau = df_nouveau[['queue', 'body']]
+
+# Fusion et Mélange (Shuffle)
+df_final = pd.concat([df_ancien, df_nouveau], ignore_index=True)
+df_final = df_final.dropna(subset=['queue', 'body']).drop_duplicates(subset=['body'])
+df_final = df_final.sample(frac=1, random_state=42).reset_index(drop=True)
+
+df_final.to_csv('train_final_3_classes.csv', index=False)
+
+```
+
+### Étape 2 : Extraction Chirurgicale (Regex N-Grams)
+
+Pour garantir l'intégrité de la classe *Feature Request* (qu'elle soit réelle ou synthétique), j'ai conçu un extracteur basé sur des expressions régulières strictes validées humainement. Cela permet d'isoler mathématiquement les vraies demandes d'évolution du reste du bruit.
+
+```python
 import re
-from sklearn.model_selection import train_test_split
 
-# ==========================================
-# 1. ACQUISITION DES DONNÉES
-# ==========================================
-file_path = 'customer_tickets.csv'
-df = pd.read_csv(file_path)
+strict_keywords = [
+    r'request the implementation', r'suggest redesigning', 
+    r'requesting a new feature', r'would be a great addition',
+    r'it would be nice if', r'suggest adding', r'feature request'
+]
+pattern = re.compile('|'.join(strict_keywords), flags=re.IGNORECASE)
 
-print(f"Nombre total d'échantillons originaux : {len(df)}") # Attendu : ~339 échantillons
+def find_strict_triggers(text):
+    if not isinstance(text, str): return ""
+    matches = pattern.findall(text)
+    return ", ".join(set([m.lower() for m in matches]))
 
-# ==========================================
-# 2. NETTOYAGE DES DONNÉES (CLEANING)
-# ==========================================
-def clean_text(text):
-    if not isinstance(text, str):
-        return ""
-    # Suppression des balises HTML (ex: <br>)
-    text = re.sub(r'<.*?>', ' ', text)
-    # Remplacement des sauts de ligne par des espaces
-    text = text.replace('\n', ' ').replace('\r', '')
-    # Suppression des espaces multiples
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
+df_final['matched_keywords'] = df_final['body'].apply(find_strict_triggers)
+feature_requests_df = df_final[df_final['matched_keywords'] != ""].copy()
 
-df['body_clean'] = df['body'].apply(clean_text)
+```
 
-# Regroupement des classes pour correspondre à la proposition du projet (3 classes cibles)
-# Technical Support -> Technical Support
-# Product Support -> Product Support
-# Tout le reste (IT Support, Customer Service, etc.) -> Other
-def map_classes(label):
-    if label == "Technical Support":
-        return "Technical Support"
-    elif label == "Product Support":
-        return "Product Support"
-    else:
-        return "Other"
+### Étape 3 : Auto-Correction des Labels par l'IA
 
-df['queue_mapped'] = df['queue'].apply(map_classes)
+De nombreux tickets originaux issus de Kaggle étaient mal catégorisés par les opérateurs humains. J'ai déployé un script d'inférence de masse pour qu'un modèle IA pré-entraîné relise l'intégralité du dataset. Si l'IA contredisait le label humain avec une confiance extrême ($\ge 90\%$), le label était corrigé automatiquement.
 
-# ==========================================
-# 3. ANALYSE EXPLORATOIRE (EDA)
-# ==========================================
-print("\n--- Distribution des classes cibles ---")
-class_dist = df['queue_mapped'].value_counts(normalize=True) * 100
-print(class_dist)
-# Attendu: Other (~45%), Technical Support (~38%), Product Support (~17%)
+```python
+from transformers import pipeline
 
-# ==========================================
-# 4. SÉPARATION STRATIFIÉE 80/10/10
-# ==========================================
-# Étape 1 : Séparer en Entraînement (80%) et Reste (20%)
-X_train, X_temp, y_train, y_temp = train_test_split(
-    df['body_clean'], 
-    df['queue_mapped'], 
-    test_size=0.20, 
-    stratify=df['queue_mapped'], # Stratification cruciale ici
-    random_state=42
-)
+# Inférence de masse sur le corpus nettoyé
+classifier = pipeline("text-classification", model="./distilbert-ticket-classifier-final", device=-1)
+results = classifier(train_df['clean_text'].to_list(), truncation=True, max_length=128)
 
-# Étape 2 : Séparer le Reste (20%) en Validation (10%) et Test (10%)
-# Puisque test_size=0.5 sur les 20% restants, cela donne 10% du dataset total chacun.
-X_val, X_test, y_val, y_test = train_test_split(
-    X_temp, 
-    y_temp, 
-    test_size=0.50, 
-    stratify=y_temp, 
-    random_state=42
-)
+train_df['Prediction_IA'] = [res['label'] for res in results]
+train_df['Confidence'] = [res['score'] for res in results]
 
-print("\n--- Tailles des sous-ensembles ---")
-print(f"Train: {len(X_train)} échantillons ({len(X_train)/len(df)*100:.0f}%)")
-print(f"Validation: {len(X_val)} échantillons ({len(X_val)/len(df)*100:.0f}%)")
-print(f"Test: {len(X_test)} échantillons ({len(X_test)/len(df)*100:.0f}%)")
+# Écrasement des erreurs humaines évidentes
+SEUIL_CONFIANCE = 0.90
+mask_to_correct = (train_df['queue'] != train_df['Prediction_IA']) & (train_df['Confidence'] >= SEUIL_CONFIANCE)
 
-# Sauvegarde des datasets propres
-train_df = pd.DataFrame({'text': X_train, 'label': y_train})
-val_df = pd.DataFrame({'text': X_val, 'label': y_val})
-test_df = pd.DataFrame({'text': X_test, 'label': y_test})
+train_df.loc[mask_to_correct, 'queue'] = train_df.loc[mask_to_correct, 'Prediction_IA']
+train_df.drop(columns=['clean_text', 'Prediction_IA', 'Confidence']).to_csv('data/train_autocorrected.csv', index=False)
 
-train_df.to_csv('data/train.csv', index=False)
-val_df.to_csv('data/val.csv', index=False)
-test_df.to_csv('data/test.csv', index=False)
+```
+
+### Étape 4 : Équilibrage (Undersampling)
+
+Même après augmentation, la classe *Support* (100% issue de Kaggle) restait sur-représentée. Pour éviter que le modèle ne développe un biais de prédiction majoritaire, j'ai appliqué un undersampling strict sur cette classe avant la séparation finale stratifiée.
+
+```python
+# Plafonnement de la classe majoritaire
+support = df_final[df_final["queue"] == "Support"].sample(n=2094, random_state=42)
+others = df_final[df_final["queue"] != "Support"]
+
+# Reconstitution du dataset équilibré
+df_balanced = pd.concat([support, others], ignore_index=True)
+print(df_balanced["queue"].value_counts())
 
 ```
 
 ## 3. Lien avec le Cours DL2026
 
-La réalisation de cette phase respecte rigoureusement les directives du cours (Module 2, Reading 3 - *How to Draft a Feasible Project Proposal*) pour dérisquer le projet le plus tôt possible :
+La réalisation de ce milestone valide rigoureusement les concepts abordés dans le cours (Module 2, Reading 3 - *How to Draft a Feasible Project Proposal*) pour dérisquer le projet le plus tôt possible :
 
-1. **Focus sur la Qualité des Données ("Data work is given equal weight to modelling") :** La proposition montre que les réseaux neuronaux nécessitent des données bien comprises. Le traitement des balises HTML et des symboles de variables internes (`<name>`, `<tel_num>`) évite que le modèle Baseline (TF-IDF) n'apprenne sur du bruit (Reading 2 - Classical ML).
-2. **Gestion du Déséquilibre (Class Imbalance) :** La classe *Product Support* ne représente que 17% des 339 échantillons (soit environ 57 tickets au total). Une séparation aléatoire aurait pu la faire disparaître des ensembles de validation ou de test. **L'utilisation de la stratification (`stratify=y`) garantit que ces 17% se retrouvent uniformément** dans les splits d'entraînement, de validation et de test.
-3. **Préparation pour la Modélisation :** * Pour Antoine (Baseline - S7) : Le nettoyage poussé (espaces, retours chariots) va optimiser la matrice creuse (sparse matrix) générée par le TF-IDF.
-* Pour Arslan (Deep Learning - S11) : Les modèles de type *Transformer* (DistilBERT) utilisent un tokeniseur par sous-mots (WordPiece) qui gère bien la casse, mais qui est perturbé par du code HTML non nettoyé. L'approche est donc prête pour le Fine-Tuning.
+1. **Focus sur la Qualité des Données ("Data work is given equal weight to modelling") :** La proposition du cours insiste sur le fait que l'architecture d'un modèle ne peut compenser une mauvaise donnée. Le passage au *Data-Centric* (purification par IA, regex strictes) a permis de débloquer les performances du modèle, passant de 50% à des scores prêts pour la production.
+2. **Gestion du Déséquilibre (Class Imbalance) :** Sans l'undersampling à 2094 échantillons et l'augmentation ciblée par données synthétiques pour les *Feature Requests*, les modèles de la Baseline (Antoine) et Deep Learning (Arslan) auraient ignoré les classes minoritaires.
+3. **Préparation pour la Modélisation :** L'élimination du bruit garantit une matrice creuse (TF-IDF) de haute qualité pour la régression logistique, et des *embeddings* riches de sens pour les tokens contextuels (`[CLS]`) du Transformer DistilBERT.
