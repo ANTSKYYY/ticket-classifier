@@ -112,9 +112,6 @@ Notre objectif initial était d'atteindre un Macro F1-score d'au moins 0.82. Les
 
 Sur les 442 tickets de test aveugle, seules **43 erreurs** ont été recensées. Mon rôle consiste à analyser qualitativement ces échecs pour démontrer qu'ils ne relèvent pas d'une faille architecturale, mais de l'ambiguïté du langage naturel.
 
-### A. La perfection sur "Feature Request" (Preuve de l'approche Data-Centric)
-
-* **Score F1 : 1.00 (100%)**
 ### A. La perfection sur "Feature Request" : Succès Data-Centric et Biais Synthétique
 
 * **Score F1 : 1.00 (100%)**
