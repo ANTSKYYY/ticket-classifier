@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Ticket Classifier</title>
+    <style>
+
+        .xai-impact-pos {
+            color: #10b981; /* Vert */
+            font-weight: bold;
+        }
+        .xai-impact-neg {
+            color: #f43f5e; /* Rouge */
+            font-weight: bold;
+        }
+        .xai-alt-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-left: 8px;
+            font-style: italic;
+        }
+        .xai-section-title {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin: 16px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 1rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            border-color: var(--primary);
+        }
+        button {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+        /* Zone de résultat (cachée par défaut) */
+        #result-section {
+            margin-top: 24px;
+            display: none;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+        }
+        .label-badge {
+            display: inline-block;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+        .confidence-bar-bg {
+            width: 100%;
+            background-color: #334155;
+            border-radius: 999px;
+            height: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .confidence-bar-fill {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+        .xai-section {
+            margin-top: 20px;
+        }
+        .xai-item {
+            display: flex;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        .xai-impact {
+            color: #f43f5e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Support Ticket AI</h1>
+    <p class="subtitle">Propulsé par RoBERTa & Explainable AI</p>
+
+    <div class="card">
+        <textarea id="ticketInput" placeholder="Ex: I tried to pay my invoice but the app crashed..."></textarea>
+        <button id="analyzeBtn" onclick="analyzeTicket()">Analyser le ticket</button>
+
+        <div id="result-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="predLabel" class="label-badge">SUPPORT</span>
+                <span style="font-weight: bold;" id="predConf">98.5%</span>
+            </div>
+            <div class="confidence-bar-bg">
+                <div id="confBar" class="confidence-bar-fill"></div>
+            </div>
+
+            <div class="xai-section" id="xaiContainer">
+                <h3 style="font-size: 1rem; color: var(--text-muted); margin-bottom: 12px;">Mots déclencheurs (Ablation) :</h3>
+                <div id="xaiList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function analyzeTicket() {
+        const text = document.getElementById('ticketInput').value;
+        if (!text.trim()) return;
+
+        const btn = document.getElementById('analyzeBtn');
+        const resultSection = document.getElementById('result-section');
+        const xaiList = document.getElementById('xaiList');
+        
+        // État de chargement
+        btn.disabled = true;
+        btn.innerText = "Analyse neuronale en cours...";
+        resultSection.style.display = "none";
+        xaiList.innerHTML = "";
+
+        try {
+        
+            const response = await fetch('https://antskyyy-deeplearningchina.hf.space/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            
+            const data = await response.json();
+
+            // Affichage des résultats globaux
+            document.getElementById('predLabel').innerText = data.label;
+            document.getElementById('predConf').innerText = data.confidence + "%";
+            
+            // Animation de la barre
+            setTimeout(() => {
+                document.getElementById('confBar').style.width = data.confidence + "%";
+            }, 100);
+
+            // Gestion de l'affichage XAI (Mots clés)
+            const hasPositives = data.positive_explanations && data.positive_explanations.length > 0;
+            const hasNegatives = data.negative_explanations && data.negative_explanations.length > 0;
+
+            if (hasPositives || hasNegatives) {
+                
+                // --- Mots qui confirment la classe ---
+                if (hasPositives) {
+                    const titlePos = document.createElement('div');
+                    titlePos.className = 'xai-section-title';
+                    titlePos.innerText = "✅ Mots soutenant la décision :";
+                    xaiList.appendChild(titlePos);
+
+                    data.positive_explanations.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'xai-item';
+                        div.innerHTML = `<span>'${item.word}'</span> <span class="xai-impact-pos">+${item.impact_on_confidence}%</span>`;
+                        xaiList.appendChild(div);
+                    });
+                }
+
+                // --- Mots qui sèment le doute ---
+                if (hasNegatives) {
+                    const titleNeg = document.createElement('div');
+                    titleNeg.className = 'xai-section-title';
+                    titleNeg.innerText = "⚠️ Mots tirant vers une autre classe :";
+                    xaiList.appendChild(titleNeg);
+
+                    data.negative_explanations.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'xai-item';
+                        // On affiche le mot, la classe alternative qu'il soutenait, et la baisse de confiance
+                        div.innerHTML = `
+                            <span>'${item.word}' <span class="xai-alt-label">(→ ${item.supported_alternative})</span></span> 
+                            <span class="xai-impact-neg">-${item.decreased_main_by}%</span>
+                        `;
+                        xaiList.appendChild(div);
+                    });
+                }
+
+            } else {
+                xaiList.innerHTML = `<div class="xai-item" style="color: #94a3b8; justify-content: center;">Contexte global (aucun mot dominant n'a été détecté)</div>`;
+            }
+
+            resultSection.style.display = "block";
+            
+        } catch (error) {
+            alert("Erreur de connexion au serveur. Assurez-vous que l'API Python tourne !");
+            console.error(error);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Analyser le ticket";
+        }
+    }
+</script>
+
+</body>
+</html>
