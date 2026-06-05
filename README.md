@@ -1,4 +1,10 @@
+Voici ton fichier `README.md` mis à jour avec le lien vers la démo en ligne bien mis en évidence tout en haut !
+
+---
+
 # 🎫 Automatic Customer Support Ticket Routing
+
+🚀 **Testez notre modèle en direct : [Application Web Interactive (XAI)**](https://antskyyy.github.io/deeplearning/)
 
 Notre projet porte sur la classification automatique de tickets de support client en utilisant des méthodes de Machine Learning classique et de Deep Learning. Face aux limites d'un jeu de données initial restreint, notre équipe a adopté une approche **Data-Centric** couplée à des techniques d'entraînement avancées (**Curriculum Learning & Adversarial Training**) pour atteindre des performances de niveau production.
 
@@ -65,15 +71,15 @@ Le jeu de données nettoyé et augmenté produit pour ce projet (notamment `trai
 
 **Vous êtes libre de :**
 
-* **Partager** — copier, distribuer et communiquer le dataset par tous moyens et sous tous formats.
-* **Adapter** — remixer, transformer et créer à partir du dataset pour toute utilisation, y compris commerciale.
+* **Partager** - copier, distribuer et communiquer le dataset par tous moyens et sous tous formats.
+* **Adapter** - remixer, transformer et créer à partir du dataset pour toute utilisation, y compris commerciale.
 
 **Sous les conditions suivantes :**
 
 * **Attribution (Crédit) :** Vous devez créditer notre équipe, intégrer un lien vers la licence et indiquer si des modifications ont été effectuées.
 
 **Origine des données et modifications :**
-Ce dataset est une version lourdement modifiée (approche *Data-Centric*) d'un corpus originalement issu de [Kaggle - Customer Support Ticket Tagger](https://www.kaggle.com/code/warcoder/customer-support-ticket-tagger). Les modifications apportées par notre équipe incluent :
+Ce dataset est une version lourdement modifiée (approche *Data-Centric*) d'un corpus originalement issu de [Kaggle -Customer Support Ticket Tagger](https://www.kaggle.com/code/warcoder/customer-support-ticket-tagger). Les modifications apportées par notre équipe incluent :
 
 1. Le nettoyage strict par expressions régulières (Regex).
 2. La correction automatisée des labels par IA.
@@ -81,4 +87,4 @@ Ce dataset est une version lourdement modifiée (approche *Data-Centric*) d'un c
 
 Si vous utilisez ce dataset dans vos travaux, merci de citer ce dépôt GitHub :
 
-> *Ti Pip Team* - "Ticket Classification Data-Centric Dataset", 2026.
+> *Ti Pip Team* -"Ticket Classification Data-Centric Dataset", 2026.
