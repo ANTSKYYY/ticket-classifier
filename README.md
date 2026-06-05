@@ -1,7 +1,3 @@
-Voici ton fichier `README.md` mis à jour avec le lien vers la démo en ligne bien mis en évidence tout en haut !
-
----
-
 # 🎫 Automatic Customer Support Ticket Routing
 
 🚀 **Testez notre modèle en direct : [Application Web Interactive (XAI)**](https://antskyyy.github.io/deeplearning/)
