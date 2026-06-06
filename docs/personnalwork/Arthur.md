@@ -1,42 +1,43 @@
-# 📊 Milestone S4 : Préparation des Données et Approche Data-Centric
+# 📊 Milestone S4: Data Preparation and Data-Centric Approach
 
-**Responsable :** Arthur Le Coroller
-**Objectif :** Acquérir, nettoyer, augmenter et purifier le jeu de données pour garantir le succès des modèles de Machine Learning (Baseline) et de Deep Learning (DistilBERT), en appliquant les principes d'ingénierie des données vus dans le cours DL2026.
+**Lead:** Arthur Le Coroller
 
-## 1. Contexte et Problématique Initiale
+**Objective:** Acquire, clean, augment, and purify the dataset to ensure the success of the Machine Learning (Baseline) and Deep Learning (DistilBERT) models, applying the data engineering principles covered in the DL2026 course.
 
-Lors de la phase d'exploration initiale, notre jeu de données original (Kaggle) ne contenait qu'environ 339 échantillons. Les premiers tests d'entraînement montraient que les modèles plafonnaient à une précision d'environ 50%, même avec des architectures avancées comme DistilBERT.
+## 1. Context and Initial Problem
 
-Des audits approfondis des données ont révélé que le problème ne venait pas des modèles, mais de la **vérité terrain** :
+During the initial exploration phase, our original dataset (Kaggle) contained only about 339 samples. Initial training tests showed that models plateaued at an accuracy of around 50%, even with advanced architectures like DistilBERT.
 
-* Volume de données largement insuffisant pour du Deep Learning.
-* Bruit important dans les textes bruts.
-* Déséquilibre critique des classes.
-* Erreurs humaines fréquentes dans l'étiquetage d'origine.
+In-depth data audits revealed that the problem did not stem from the models, but from the **ground truth**:
 
-J'ai donc décidé de pivoter vers une approche **Data-Centric**, en considérant que l'optimisation de la donnée était prioritaire sur l'optimisation de l'algorithme.
+* Vastly insufficient data volume for Deep Learning.
+* Significant noise in the raw texts.
+* Critical class imbalance.
+* Frequent human errors in the original labeling.
 
-## 2. Pipeline Data-Centric (Méthodologie et Code)
+Therefore, I decided to pivot to a **Data-Centric** approach, considering that data optimization was a higher priority than algorithm optimization.
 
-Pour résoudre ces problèmes, j'ai mis en place un pipeline de traitement en quatre grandes étapes.
+## 2. Data-Centric Pipeline (Methodology and Code)
 
-### Étape 1 : Augmentation des Données et Fusion
+To solve these issues, I implemented a data processing pipeline in four main steps.
 
-Pour pallier le manque de volume, le corpus a été étendu à plus de 4 000 échantillons. **Il est important de préciser que la très grande majorité de ces données provient directement du dataset Kaggle et est composée de tickets réels (non synthétiques).** Cependant, la classe *Feature Request* était en sous-effectif critique. Pour combler ce vide spécifique, des tickets ont été générés par IA (Gemini) en se basant strictement sur des modèles de tickets déjà existants. **Seule la catégorie des demandes de fonctionnalités a fait l'objet d'une augmentation synthétique.** L'ensemble a ensuite été fusionné et brassé (*shuffle*) pour éviter tout biais d'ordre d'apprentissage.
+### Step 1: Data Augmentation and Fusion
+
+To compensate for the lack of volume, the corpus was expanded to over 4,000 samples. **It is important to note that the vast majority of this data comes directly from the Kaggle dataset and consists of real (non-synthetic) tickets.** However, the *Feature Request* class was critically underrepresented. To specifically fill this gap, tickets were AI-generated (Gemini) based strictly on existing ticket templates. **Only the feature request category underwent synthetic augmentation.** The whole set was then merged and shuffled to avoid any learning order bias.
 
 ```python
 import pandas as pd
 
-# Chargement du dataset réel (Kaggle) et du dataset synthétique ciblé
-df_ancien = pd.read_csv('data/new/data4.csv') # Données 100% réelles
-df_nouveau = pd.read_csv('data/new/synthetic_feature_requests_gemini.csv') # Uniquement Feature Requests
+# Loading the real dataset (Kaggle) and targeted synthetic dataset
+df_old = pd.read_csv('data/new/data4.csv') # 100% real data
+df_new = pd.read_csv('data/new/synthetic_feature_requests_gemini.csv') # Only Feature Requests
 
-# Uniformisation des colonnes et nettoyage des valeurs nulles
-df_ancien = df_ancien[['queue', 'body']].rename(columns={'text': 'body', 'label': 'queue'}, errors='ignore')
-df_nouveau = df_nouveau[['queue', 'body']]
+# Standardizing columns and cleaning null values
+df_old = df_old[['queue', 'body']].rename(columns={'text': 'body', 'label': 'queue'}, errors='ignore')
+df_new = df_new[['queue', 'body']]
 
-# Fusion et Mélange (Shuffle)
-df_final = pd.concat([df_ancien, df_nouveau], ignore_index=True)
+# Merging and Shuffling
+df_final = pd.concat([df_old, df_new], ignore_index=True)
 df_final = df_final.dropna(subset=['queue', 'body']).drop_duplicates(subset=['body'])
 df_final = df_final.sample(frac=1, random_state=42).reset_index(drop=True)
 
@@ -44,9 +45,9 @@ df_final.to_csv('train_final_3_classes.csv', index=False)
 
 ```
 
-### Étape 2 : Extraction Chirurgicale (Regex N-Grams)
+### Step 2: Surgical Extraction (Regex N-Grams)
 
-Pour garantir l'intégrité de la classe *Feature Request* (qu'elle soit réelle ou synthétique), j'ai conçu un extracteur basé sur des expressions régulières strictes validées humainement. Cela permet d'isoler mathématiquement les vraies demandes d'évolution du reste du bruit.
+To ensure the integrity of the *Feature Request* class (whether real or synthetic), I designed an extractor based on strict, human-validated regular expressions. This allows the true feature requests to be mathematically isolated from the rest of the noise.
 
 ```python
 import re
@@ -68,48 +69,48 @@ feature_requests_df = df_final[df_final['matched_keywords'] != ""].copy()
 
 ```
 
-### Étape 3 : Auto-Correction des Labels par l'IA
+### Step 3: AI Label Auto-Correction
 
-De nombreux tickets originaux issus de Kaggle étaient mal catégorisés par les opérateurs humains. J'ai déployé un script d'inférence de masse pour qu'un modèle IA pré-entraîné relise l'intégralité du dataset. Si l'IA contredisait le label humain avec une confiance extrême ($\ge 90\%$), le label était corrigé automatiquement.
+Many original tickets from Kaggle were miscategorized by human operators. I deployed a mass inference script so that a pre-trained AI model could re-evaluate the entire dataset. If the AI contradicted the human label with extreme confidence (≥ 90%), the label was automatically corrected.
 
 ```python
 from transformers import pipeline
 
-# Inférence de masse sur le corpus nettoyé
+# Mass inference on the cleaned corpus
 classifier = pipeline("text-classification", model="./distilbert-ticket-classifier-final", device=-1)
 results = classifier(train_df['clean_text'].to_list(), truncation=True, max_length=128)
 
 train_df['Prediction_IA'] = [res['label'] for res in results]
 train_df['Confidence'] = [res['score'] for res in results]
 
-# Écrasement des erreurs humaines évidentes
-SEUIL_CONFIANCE = 0.90
-mask_to_correct = (train_df['queue'] != train_df['Prediction_IA']) & (train_df['Confidence'] >= SEUIL_CONFIANCE)
+# Overwriting obvious human errors
+CONFIDENCE_THRESHOLD = 0.90
+mask_to_correct = (train_df['queue'] != train_df['Prediction_IA']) & (train_df['Confidence'] >= CONFIDENCE_THRESHOLD)
 
 train_df.loc[mask_to_correct, 'queue'] = train_df.loc[mask_to_correct, 'Prediction_IA']
 train_df.drop(columns=['clean_text', 'Prediction_IA', 'Confidence']).to_csv('data/train_autocorrected.csv', index=False)
 
 ```
 
-### Étape 4 : Équilibrage (Undersampling)
+### Step 4: Balancing (Undersampling)
 
-Même après augmentation, la classe *Support* (100% issue de Kaggle) restait sur-représentée. Pour éviter que le modèle ne développe un biais de prédiction majoritaire, j'ai appliqué un undersampling strict sur cette classe avant la séparation finale stratifiée.
+Even after augmentation, the *Support* class (100% from Kaggle) remained overrepresented. To prevent the model from developing a majority prediction bias, I applied strict undersampling to this class before the final stratified split.
 
 ```python
-# Plafonnement de la classe majoritaire
+# Capping the majority class
 support = df_final[df_final["queue"] == "Support"].sample(n=2094, random_state=42)
 others = df_final[df_final["queue"] != "Support"]
 
-# Reconstitution du dataset équilibré
+# Reconstructing the balanced dataset
 df_balanced = pd.concat([support, others], ignore_index=True)
 print(df_balanced["queue"].value_counts())
 
 ```
 
-## 3. Lien avec le Cours DL2026
+## 3. Link with the DL2026 Course
 
-La réalisation de ce milestone valide rigoureusement les concepts abordés dans le cours (Module 2, Reading 3 - *How to Draft a Feasible Project Proposal*) pour dérisquer le projet le plus tôt possible :
+The completion of this milestone rigorously validates the concepts covered in the course (Module 2, Reading 3 - *How to Draft a Feasible Project Proposal*) to de-risk the project as early as possible:
 
-1. **Focus sur la Qualité des Données ("Data work is given equal weight to modelling") :** La proposition du cours insiste sur le fait que l'architecture d'un modèle ne peut compenser une mauvaise donnée. Le passage au *Data-Centric* (purification par IA, regex strictes) a permis de débloquer les performances du modèle, passant de 50% à des scores prêts pour la production.
-2. **Gestion du Déséquilibre (Class Imbalance) :** Sans l'undersampling à 2094 échantillons et l'augmentation ciblée par données synthétiques pour les *Feature Requests*, les modèles de la Baseline (Antoine) et Deep Learning (Arslan) auraient ignoré les classes minoritaires.
-3. **Préparation pour la Modélisation :** L'élimination du bruit garantit une matrice creuse (TF-IDF) de haute qualité pour la régression logistique, et des *embeddings* riches de sens pour les tokens contextuels (`[CLS]`) du Transformer DistilBERT.
+1. **Focus on Data Quality ("Data work is given equal weight to modelling"):** The course proposal emphasizes that a model's architecture cannot compensate for bad data. The shift to a *Data-Centric* approach (AI purification, strict regex) unlocked the model's performance, jumping from 50% to production-ready scores.
+2. **Imbalance Management (Class Imbalance):** Without the undersampling to 2094 samples and the targeted synthetic data augmentation for *Feature Requests*, both the Baseline (Antoine) and Deep Learning (Arslan) models would have ignored the minority classes.
+3. **Preparation for Modeling:** Noise elimination guarantees a high-quality sparse matrix (TF-IDF) for logistic regression, and meaningful *embeddings* for the contextual tokens (`[CLS]`) of the DistilBERT Transformer.
