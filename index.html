@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Ticket Classifier</title>
+    <title>DL Ticket Classifier</title>
     <style>
 
         .xai-impact-pos {
-            color: #10b981; /* Vert */
+            color: #10b981; /* Green */
             font-weight: bold;
         }
         .xai-impact-neg {
-            color: #f43f5e; /* Rouge */
+            color: #f43f5e; /* Red */
             font-weight: bold;
         }
         .xai-alt-label {
@@ -107,7 +107,7 @@
             background-color: #475569;
             cursor: not-allowed;
         }
-        /* Zone de résultat (cachée par défaut) */
+        /* Result area (hidden by default) */
         #result-section {
             margin-top: 24px;
             display: none;
@@ -161,12 +161,12 @@
 <body>
 
 <div class="container">
-    <h1>Support Ticket AI</h1>
-    <p class="subtitle">Propulsé par RoBERTa & Explainable AI</p>
+    <h1>Support Ticket DL</h1>
+    <p class="subtitle">Powered by RoBERTa & Explainable Deep Learning</p>
 
     <div class="card">
         <textarea id="ticketInput" placeholder="Ex: I tried to pay my invoice but the app crashed..."></textarea>
-        <button id="analyzeBtn" onclick="analyzeTicket()">Analyser le ticket</button>
+        <button id="analyzeBtn" onclick="analyzeTicket()">Analyze ticket</button>
 
         <div id="result-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -178,7 +178,7 @@
             </div>
 
             <div class="xai-section" id="xaiContainer">
-                <h3 style="font-size: 1rem; color: var(--text-muted); margin-bottom: 12px;">Mots déclencheurs (Ablation) :</h3>
+                <h3 style="font-size: 1rem; color: var(--text-muted); margin-bottom: 12px;">Trigger words (Ablation):</h3>
                 <div id="xaiList"></div>
             </div>
         </div>
@@ -194,9 +194,9 @@
         const resultSection = document.getElementById('result-section');
         const xaiList = document.getElementById('xaiList');
         
-        // État de chargement
+        // Loading state
         btn.disabled = true;
-        btn.innerText = "Analyse neuronale en cours...";
+        btn.innerText = "Neural analysis in progress...";
         resultSection.style.display = "none";
         xaiList.innerHTML = "";
 
@@ -210,26 +210,26 @@
             
             const data = await response.json();
 
-            // Affichage des résultats globaux
+            // Displaying overall results
             document.getElementById('predLabel').innerText = data.label;
             document.getElementById('predConf').innerText = data.confidence + "%";
             
-            // Animation de la barre
+            // Bar animation
             setTimeout(() => {
                 document.getElementById('confBar').style.width = data.confidence + "%";
             }, 100);
 
-            // Gestion de l'affichage XAI (Mots clés)
+            // XAI display management (Keywords)
             const hasPositives = data.positive_explanations && data.positive_explanations.length > 0;
             const hasNegatives = data.negative_explanations && data.negative_explanations.length > 0;
 
             if (hasPositives || hasNegatives) {
                 
-                // --- Mots qui confirment la classe ---
+                // --- Words confirming the class ---
                 if (hasPositives) {
                     const titlePos = document.createElement('div');
                     titlePos.className = 'xai-section-title';
-                    titlePos.innerText = "✅ Mots soutenant la décision :";
+                    titlePos.innerText = "✅ Words supporting the decision:";
                     xaiList.appendChild(titlePos);
 
                     data.positive_explanations.forEach(item => {
@@ -240,17 +240,17 @@
                     });
                 }
 
-                // --- Mots qui sèment le doute ---
+                // --- Words causing doubt ---
                 if (hasNegatives) {
                     const titleNeg = document.createElement('div');
                     titleNeg.className = 'xai-section-title';
-                    titleNeg.innerText = "⚠️ Mots tirant vers une autre classe :";
+                    titleNeg.innerText = "⚠️ Words pulling towards another class:";
                     xaiList.appendChild(titleNeg);
 
                     data.negative_explanations.forEach(item => {
                         const div = document.createElement('div');
                         div.className = 'xai-item';
-                        // On affiche le mot, la classe alternative qu'il soutenait, et la baisse de confiance
+                        // Display the word, the alternative class it supported, and the confidence drop
                         div.innerHTML = `
                             <span>'${item.word}' <span class="xai-alt-label">(→ ${item.supported_alternative})</span></span> 
                             <span class="xai-impact-neg">-${item.decreased_main_by}%</span>
@@ -260,17 +260,17 @@
                 }
 
             } else {
-                xaiList.innerHTML = `<div class="xai-item" style="color: #94a3b8; justify-content: center;">Contexte global (aucun mot dominant n'a été détecté)</div>`;
+                xaiList.innerHTML = `<div class="xai-item" style="color: #94a3b8; justify-content: center;">Global context (no dominant word detected)</div>`;
             }
 
             resultSection.style.display = "block";
             
         } catch (error) {
-            alert("Erreur de connexion au serveur. Assurez-vous que l'API Python tourne !");
+            alert("Server connection error. Make sure the Python API is running!");
             console.error(error);
         } finally {
             btn.disabled = false;
-            btn.innerText = "Analyser le ticket";
+            btn.innerText = "Analyze ticket";
         }
     }
 </script>
