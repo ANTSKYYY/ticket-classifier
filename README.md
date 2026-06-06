@@ -37,7 +37,7 @@ Dans les grandes entreprises, les équipes de support perdent un temps précieux
 * **Evan Tangatchy (S14) :** Évaluation finale du pipeline, extraction des métriques et analyse qualitative des erreurs résiduelles (chevauchement sémantique).
 * **Enzo Dziewulski (S15) :** Préparation de la soutenance finale, défense des choix architecturaux et gestion des risques.
 
-🔗 [Voir les journaux de bord et missions détaillées de chacun](https://www.google.com/search?q=docs/missions.md)
+🔗 [Voir les journaux de bord et missions détaillées de chacun](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/missions.md)
 
 ## 📊 Jeu de Données (Approche Data-Centric)
 
