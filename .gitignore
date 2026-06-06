@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+hf_cache/
+env_test/
+.DS_Store

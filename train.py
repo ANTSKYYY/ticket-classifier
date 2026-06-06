@@ -9,6 +9,10 @@ import yaml
 import torch
 import random
 import numpy as np
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--config", default="configs/default.yaml")
+args = parser.parse_args()
 import pandas as pd
 from sklearn.utils.class_weight import compute_class_weight
 from transformers import (
@@ -24,7 +28,7 @@ from src.utils import compute_metrics
 
 def main():
     # 1. Chargement de la configuration
-    with open("configs/default.yaml", "r") as f:
+    with open(args.config, "r") as f:
         config = yaml.safe_load(f)
 
     SEED = config['training']['seed']

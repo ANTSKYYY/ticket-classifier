@@ -1,5 +1,7 @@
 import os
-
+import random
+import torch
+import numpy as np
 
 os.environ["HF_HOME"] = "./hf_cache"
 os.environ["HF_HUB_DISABLE_TOKEN"] = "1"
@@ -7,14 +9,16 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import json
 import yaml
-import torch
+import argparse
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import f1_score, accuracy_score, classification_report, confusion_matrix
 from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification
-
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
 # Configuration HF
 os.environ["HF_HOME"] = "./hf_cache"
 os.environ["HF_HUB_DISABLE_TOKEN"] = "1"
@@ -22,28 +26,40 @@ os.environ["HF_HUB_DISABLE_TOKEN"] = "1"
 from src.data import apply_cleaning, LABEL_MAPPING, ID2LABEL
 
 def main():
+    # 0. Gestion des arguments de la ligne de commande
+    parser = argparse.ArgumentParser(description="Évaluation du modèle de classification de tickets.")
+    parser.add_argument("--checkpoint", type=str, default="./checkpoints/best", help="Chemin du dossier ou du fichier du checkpoint à évaluer.")
+    args = parser.parse_args()
+
     # 1. Config et Device
     with open("configs/default.yaml", "r") as f:
         config = yaml.safe_load(f)
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
-    # 2. Gestion et sélection du checkpoint (Dossier principal vs Dossier de secours)
-    PRIMARY_PATH = "./checkpoints/best"
-    FALLBACK_PATH = "./checkpoints/github"
-    MODEL_PATH = PRIMARY_PATH
+    # 2. Sélection et validation du chemin du checkpoint
+    checkpoint_path = args.checkpoint
+    
+    # Si le chemin cible un fichier (ex: best.pt ou model.safetensors), on extrait son dossier parent
+    if os.path.isfile(checkpoint_path):
+        checkpoint_dir = os.path.dirname(checkpoint_path)
+    else:
+        checkpoint_dir = checkpoint_path
 
-    # Vérification de l'existence du fichier de poids dans le dossier principal
-    if not os.path.exists(os.path.join(PRIMARY_PATH, "model.safetensors")):
-        if os.path.exists(os.path.join(FALLBACK_PATH, "model.safetensors")):
+    # Dossier de secours si le dossier spécifié n'existe pas ou ne contient pas les poids
+    FALLBACK_PATH = "./checkpoint"
+    MODEL_PATH = checkpoint_dir
+
+    if not os.path.exists(os.path.join(MODEL_PATH, "model.safetensors")):
+        if MODEL_PATH != FALLBACK_PATH and os.path.exists(os.path.join(FALLBACK_PATH, "model.safetensors")):
             MODEL_PATH = FALLBACK_PATH
-            print(f"⚠️ Aucun entraînement trouvé dans {PRIMARY_PATH}.")
+            print(f"⚠️ Aucun fichier 'model.safetensors' trouvé dans {checkpoint_dir}.")
             print(f"🔄 Bascule automatique sur votre checkpoint de sauvegarde : {MODEL_PATH}")
         else:
-            print(f"❌ Erreur: Aucun fichier 'model.safetensors' trouvé dans {PRIMARY_PATH} ni dans {FALLBACK_PATH}.")
-            print("Veuillez lancer l'entraînement ('python train.py') ou placer vos fichiers dans le dossier './checkpoint/'.")
+            print(f"❌ Erreur: Aucun fichier 'model.safetensors' trouvé dans {MODEL_PATH}.")
+            print("Veuillez lancer l'entraînement ('python train.py') ou vérifier vos fichiers de checkpoint.")
             return
     else:
-        print(f"🧠 Chargement du modèle depuis l'entraînement récent : {MODEL_PATH}")
+        print(f"🧠 Chargement du modèle depuis : {MODEL_PATH}")
 
     try:
         # Chargement du tokenizer (local si disponible, sinon distant/cache avec le nom de base)
