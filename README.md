@@ -20,7 +20,7 @@ make train
 # 4. Évaluer le modèle sur le jeu de test
 make eval
 
-# 5. Analyser les résultats :** Consultez le dossier `results/` pour retrouver les métriques officielles (`metrics.json`), la matrice de confusion (`figures/final_confusion_matrix.png`) et l'audit des confusions (`qualitative_analysis_errors.csv`).
+# 5. Analyser les résultats : Consultez le dossier `results/` pour retrouver les métriques officielles (`metrics.json`), la matrice de confusion (`figures/final_confusion_matrix.png`) et l'audit des confusions (`qualitative_analysis_errors.csv`).
 
 ```
 ---
