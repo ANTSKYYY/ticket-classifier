@@ -28,7 +28,7 @@ from src.data import apply_cleaning, LABEL_MAPPING, ID2LABEL
 def main():
     # 0. Gestion des arguments de la ligne de commande
     parser = argparse.ArgumentParser(description="Évaluation du modèle de classification de tickets.")
-    parser.add_argument("--checkpoint", type=str, default="./checkpoints/best", help="Chemin du dossier ou du fichier du checkpoint à évaluer.")
+    parser.add_argument("--checkpoint", type=str, default="./checkpoints/best.pt", help="Chemin du dossier ou du fichier du checkpoint à évaluer.")
     args = parser.parse_args()
 
     # 1. Config et Device
