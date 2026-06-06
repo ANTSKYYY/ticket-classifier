@@ -4,6 +4,8 @@
 
 🚀 **Testez notre modèle en direct :** [Application Web Interactive (XAI)](https://antskyyy.github.io/deeplearning/)
 
+⏱️ **Hardware & Temps d'entraînement :** Modèle entraîné sur CPU APPLE M3 en environ 30 minutes.
+
 ## ⚙️ Setup & Reproduction (en 5 étapes)
 
 ```bash
@@ -20,7 +22,30 @@ make train
 # 4. Évaluer le modèle sur le jeu de test
 make eval
 
-# 5. Analyser les résultats : Consultez le dossier `results/` pour retrouver les métriques officielles (`metrics.json`), la matrice de confusion (`figures/final_confusion_matrix.png`) et l'audit des confusions (`qualitative_analysis_errors.csv`).
+# 5. Output attendu dans le terminal :
+# 🧠 Chargement du modèle depuis : ./checkpoints/best.pt
+# 📂 Chargement et nettoyage du set de test...
+# 🔢 Tokenisation et Inférence en cours...
+# 
+# ========================================
+# 🎯 RÉSULTATS GLOBAUX DU TEST
+# ========================================
+# Macro F1-score : 0.9121 (Cible : >= 0.82)
+# Accuracy       : 0.9048
+# 
+# 📝 RAPPORT DÉTAILLÉ :
+#                      precision    recall  f1-score   support
+# 
+#               Support       0.89      0.91      0.90       209
+#       Feature Request       1.00      1.00      1.00       102
+#  Billing and Payments       0.85      0.82      0.84       130
+# 
+#              accuracy                           0.90       441
+#             macro avg       0.91      0.91      0.91       441
+#          weighted avg       0.90      0.90      0.90       441
+# 
+# 📊 Matrice de confusion sauvegardée sous : results/figures/final_confusion_matrix.png
+# 🚨 42 erreurs extraites pour audit manuel : results/qualitative_analysis_errors.csv
 
 ```
 ---
