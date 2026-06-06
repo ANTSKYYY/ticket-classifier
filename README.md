@@ -9,20 +9,20 @@
 ## ⚙️ Setup & Reproduction (en 5 étapes)
 
 ```bash
-# 1. Cloner le dépôt
+1. Cloner le dépôt
 git clone https://github.com/ANTSKYYY/deeplearning.git
 cd deeplearning
 
-# 2. Installer les dépendances
+2. Installer les dépendances
 pip install -r requirements.txt
 
-# 3. Entraîner le modèle complet (Phase 1 & Phase 2)
+3. Entraîner le modèle complet (Phase 1 & Phase 2)
 make train
 
-# 4. Évaluer le modèle sur le jeu de test
+4. Évaluer le modèle sur le jeu de test
 make eval
 
-# 5. Output attendu dans le terminal :
+5. Output attendu dans le terminal :
 # 🧠 Chargement du modèle depuis : ./checkpoints/best.pt
 # 📂 Chargement et nettoyage du set de test...
 # 🔢 Tokenisation et Inférence en cours...
