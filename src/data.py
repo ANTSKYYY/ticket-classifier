@@ -39,7 +39,7 @@ def apply_cleaning(df: pd.DataFrame) -> pd.DataFrame:
     """Applique le nettoyage et le mapping des labels au DataFrame."""
     df = df.copy()
     df['text'] = df['text'].apply(clean_text_bert)
-    df['text'].replace('', pd.NA, inplace=True)
+    df['text'] = df['text'].replace('', pd.NA)
     
     col = 'queue' if 'queue' in df.columns else 'label'
     df['label'] = df[col].map(LABEL_MAPPING)
