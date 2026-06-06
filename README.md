@@ -76,6 +76,12 @@ L'objectif initial de notre proposition était d'atteindre un Macro F1-score $\g
 
 ---
 
+## Acknowledgements & AI Disclosure
+As per syllabus requirements, we disclose the use of the following AI tools during this project:
+
+* Google Gemini: Used to brainstorm and synthetically generate minority class tickets (Feature Requests) during the data augmentation phase.
+* ChatGPT / Claude: Used to debug specific PyTorch/Hugging Face cache permission errors, brainstorm dataset purification strategies, and refactor our exploratory Jupyter Notebooks into production-grade, PEP-8 compliant boilerplate code (train.py and evaluate.py).
+
 ## 📄 Licence
 
 * **Code source :** Ce projet est mis à disposition sous la licence **[MIT License](https://www.google.com/search?q=LICENSE)**.
