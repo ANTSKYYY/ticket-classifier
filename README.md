@@ -84,5 +84,5 @@ As per syllabus requirements, we disclose the use of the following AI tools duri
 
 ## 📄 Licence
 
-* **Code source :** Ce projet est mis à disposition sous la licence **[MIT License](https://www.google.com/search?q=LICENSE)**.
+* **Code source :** Ce projet est mis à disposition sous la licence **[MIT License](https://github.com/ANTSKYYY/deeplearning/LICENSE)**.
 * **Jeu de données :** Le dataset nettoyé et augmenté produit pour ce projet est mis à disposition sous la licence **[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.fr)**. Si vous utilisez ce dataset, merci de citer ce dépôt : *> Ti Pip Team - "Ticket Classification Data-Centric Dataset", 2026.*
