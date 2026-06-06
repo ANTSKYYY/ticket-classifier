@@ -113,5 +113,3 @@ As per syllabus requirements, we disclose the use of the following Deep Learning
 * **Dataset:** The cleaned and augmented dataset produced for this project is made available under the **[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.fr)**. If you use this dataset, please cite this repository: *> Ti Pip Team - "Ticket Classification Data-Centric Dataset", 2026.*
 
 ```
-
-```
