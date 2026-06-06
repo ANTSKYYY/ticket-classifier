@@ -1,0 +1,25 @@
+model:
+  name: "distilbert-base-uncased"
+  max_len: 128
+  num_labels: 3
+data:
+  train_augmented: "data/train_augmented.csv"
+  val: "data/val.csv"
+  test: "data/test.csv"
+  adversarial: "data/adversarial_tickets.csv"
+training:
+  seed: 42
+  phase1:
+    epochs: 2
+    batch_size: 16
+    eval_batch_size: 32
+    learning_rate: 1.5e-5
+    warmup_ratio: 0.1
+    weight_decay: 0.05
+  phase2:
+    epochs: 2
+    batch_size: 16
+    eval_batch_size: 32
+    learning_rate: 5.0e-6
+    warmup_ratio: 0.05
+    weight_decay: 0.05
