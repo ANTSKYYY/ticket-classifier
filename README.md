@@ -9,7 +9,7 @@
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/ANTSKYYY/deeplearning.git](https://github.com/ANTSKYYY/deeplearning.git)
+git clone https://github.com/ANTSKYYY/deeplearning.git
 cd deeplearning
 
 # 2. Install dependencies
