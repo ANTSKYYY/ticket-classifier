@@ -1,28 +1,43 @@
 # 🎫 Automatic Customer Support Ticket Routing
 > A robust NLP classifier (DistilBERT) achieving a **0.9178 Macro F1-score** through a Data-Centric approach, Adversarial Training, and Curriculum Learning.
 
-🚀 **Test our model live:** [Interactive Web Application (XAI)](https://antskyyy.github.io/deeplearning/)
+🚀 **Test our model live:** [Interactive Web Application (XAI)](https://antskyyy.github.io/deeplearning/)  
+☁️ **Hugging Face Model:** [Antskyyy/ticket-classifier](https://huggingface.co/Antskyyy/ticket-classifier)
 
 ⏱️ **Hardware & Training Time:** Model trained on an APPLE M3 CPU in approximately 30 minutes.
 
-## ⚙️ Setup & Reproduction (in 5 steps)
+## ⚙️ Setup & Reproduction
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ANTSKYYY/deeplearning.git
+git clone [https://github.com/ANTSKYYY/deeplearning.git](https://github.com/ANTSKYYY/deeplearning.git)
 cd deeplearning
 
 # 2. Install dependencies
 make install
 
-# 3. Train the full model (Phase 1 & Phase 2)
+# ==========================================
+# OPTION A: Quick Evaluation (Hugging Face)
+# ==========================================
+# Instantly download and evaluate our pre-trained model from the Hugging Face Hub
+make eval-hub
+
+# ==========================================
+# OPTION B: Full Training Pipeline (Local)
+# ==========================================
+# 3. Train the full model from scratch (Phase 1 & Phase 2)
 make train
 
-# 4. Evaluate the model on the test set
+# 4. Evaluate your locally trained model
 make eval
 
-# 5. Expected terminal output:
-# 🧠 Loading model from: ./checkpoints/best.pt
+```
+
+**Expected terminal output (`make eval-hub`):**
+
+```bash
+# ☁️ Mode Hub : Téléchargement du modèle depuis HF (Antskyyy/ticket-classifier)...
+# 🔤 Configuration du tokenizer par défaut : distilbert-base-uncased
 # 📂 Loading and cleaning the test set...
 # 🔢 Tokenization and Inference in progress...
 # 
@@ -35,9 +50,9 @@ make eval
 # 📝 DETAILED REPORT:
 #                      precision    recall  f1-score   support
 # 
-#               Support       0.89      0.91      0.90       209
-#       Feature Request       1.00      1.00      1.00       102
-#  Billing and Payments       0.85      0.82      0.84       130
+#              Support       0.89      0.91      0.90       209
+#      Feature Request       1.00      1.00      1.00       102
+# Billing and Payments       0.85      0.82      0.84       130
 # 
 #              accuracy                           0.90       441
 #             macro avg       0.91      0.91      0.91       441
@@ -111,5 +126,6 @@ As per syllabus requirements, we disclose the use of the following Deep Learning
 
 * **Source code:** This project is made available under the **[MIT License](https://github.com/ANTSKYYY/deeplearning/blob/main/LICENSE)**.
 * **Dataset:** The cleaned and augmented dataset produced for this project is made available under the **[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.fr)**. If you use this dataset, please cite this repository: *> Ti Pip Team - "Ticket Classification Data-Centric Dataset", 2026.*
+
 
 ```
