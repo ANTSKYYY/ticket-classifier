@@ -1,6 +1,5 @@
 import os
 
-
 os.environ["HF_HOME"] = "./hf_cache"
 os.environ["HF_HUB_DISABLE_TOKEN"] = "1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -110,9 +109,7 @@ def main():
     )
     trainer_p1.train()
 
-    # ==========================================
-    # 🔥 PHASE 2: Curriculum Learning (Adversarial)
-    # ==========================================
+    
     print("\n🔥 Starting Phase 2 (+ Adversarial)...")
     cw_full = compute_class_weight('balanced', classes=np.array([0, 1, 2]), y=train_df_full['label'].values)
     cw_full_tensor = torch.tensor(cw_full, dtype=torch.float).to(DEVICE)
@@ -138,8 +135,8 @@ def main():
     )
     trainer_p2.train()
 
-    # Saving the final model ready for evaluation
-    final_model_path = "./checkpoints/best"
+   
+    final_model_path = "./checkpoints/final_model" 
     trainer_p2.save_model(final_model_path)
     tokenizer.save_pretrained(final_model_path)
     print(f"\n✅ Training completed! Final model saved to {final_model_path}")
