@@ -13,7 +13,7 @@ git clone https://github.com/ANTSKYYY/deeplearning.git
 cd deeplearning
 
 # 2. Install dependencies
-pip install -r requirements.txt
+make install
 
 # 3. Train the full model (Phase 1 & Phase 2)
 make train
