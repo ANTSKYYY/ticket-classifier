@@ -12,6 +12,9 @@ install:
 train:
 	python train.py
 
-evaluate:
-	python evaluate.py
+eval:
+	# Évalue le modèle entraîné localement (recommandé si `make train` a été fait)
+	python evaluate.py --mode local
 
+eval-hub:
+	python evaluate.py --mode hub --hub_repo "Antskyyy/ticket-classifier"
