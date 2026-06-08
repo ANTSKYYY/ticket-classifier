@@ -8,14 +8,16 @@
 
 ### 🎥 Live Web App Demo
 *(Testing the XAI routing capabilities in real-time)*
-<video src="https://antskyyy.github.io/deeplearning/docs/demo_site_compressed.mp4" controls="controls" muted="muted" width="100%"></video>
+
+https://github.com/ANTSKYYY/deeplearning/raw/main/docs/demo_site_compressed.mp4
 
 ---
 
 ## ⚙️ Setup & Reproduction
 
 ### 📼 Video Installation Guide
-<video src="https://antskyyy.github.io/deeplearning/docs/final_compressed.mp4" controls="controls" muted="muted" width="100%"></video>
+
+https://github.com/ANTSKYYY/deeplearning/raw/main/docs/final_compressed.mp4
 
 <br>
 
