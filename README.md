@@ -8,19 +8,19 @@
 
 ### 🎥 Live Web App Demo
 *(Testing the XAI routing capabilities in real-time)*
-<video src="[https://github.com/ANTSKYYY/deeplearning/blob/main/docs/demo_site_compressed.mp4](https://github.com/ANTSKYYY/deeplearning/docs/demo_site_compressed.mp4)"></video
+<video src="[https://github.com/ANTSKYYY/deeplearning/blob/main/docs/demo_site_compressed.mp4](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/demo_site_compressed.mp4)"></video
 ---
 
 ## ⚙️ Setup & Reproduction
 
 ### 📼 Video Installation Guide
-<video src="[https://github.com/ANTSKYYY/deeplearning/docs/final_compressed.mp4](https://github.com/ANTSKYYY/deeplearning/docs/final_compressed.mp4)"></video
+<video src="[https://github.com/ANTSKYYY/deeplearning/blob/main/docs/final_compressed.mp4](https://github.com/ANTSKYYY/deeplearning/blob/main/docs/final_compressed.mp4)"></video
 
 <br>
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/ANTSKYYY/deeplearning.git](https://github.com/ANTSKYYY/deeplearning.git)
+git clone https://github.com/ANTSKYYY/deeplearning.git
 cd deeplearning
 
 # 2. Install dependencies
