@@ -8,14 +8,14 @@
 
 ### 🎥 Live Web App Demo
 *(Testing the XAI routing capabilities in real-time)*
-![Live Demo](./docs/demo_site_compressed.mp4)
+<video src="./docs/demo_site_compressed.mp4" controls="controls" muted="muted" width="100%"></video>
 
 ---
 
 ## ⚙️ Setup & Reproduction
 
 ### 📼 Video Installation Guide
-![Installation Guide](./docs/final_compressed.mp4)
+<video src="./docs/final_compressed.mp4" controls="controls" muted="muted" width="100%"></video>
 
 <br>
 
