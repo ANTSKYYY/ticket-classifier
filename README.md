@@ -6,11 +6,22 @@
 
 ⏱️ **Hardware & Training Time:** Model trained on an APPLE M3 CPU in approximately 30 minutes.
 
+### 🎥 Live Web App Demo
+*(Testing the XAI routing capabilities in real-time)*
+<video src="https://cdn.jsdelivr.net/gh/ANTSKYYY/deeplearning@assets/demo_site.mp4" controls="controls" muted="muted" width="100%"></video>
+
+---
+
 ## ⚙️ Setup & Reproduction
+
+### 📼 Video Installation Guide
+<video src="https://cdn.jsdelivr.net/gh/ANTSKYYY/deeplearning@assets/final.mp4" controls="controls" muted="muted" width="100%"></video>
+
+<br>
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ANTSKYYY/deeplearning.git
+git clone [https://github.com/ANTSKYYY/deeplearning.git](https://github.com/ANTSKYYY/deeplearning.git)
 cd deeplearning
 
 # 2. Install dependencies
@@ -31,6 +42,7 @@ make train
 # 4. Evaluate your locally trained model
 make eval
 
+
 ```
 
 **Expected terminal output (`make eval-hub`):**
@@ -48,7 +60,7 @@ make eval
 # Accuracy       : 0.9048
 # 
 # 📝 DETAILED REPORT:
-#                      precision    recall  f1-score   support
+#                     precision    recall  f1-score   support
 # 
 #              Support       0.89      0.91      0.90       209
 #      Feature Request       1.00      1.00      1.00       102
@@ -60,6 +72,7 @@ make eval
 # 
 # 📊 Confusion matrix saved to: results/figures/final_confusion_matrix.png
 # 🚨 42 errors extracted for manual audit: results/qualitative_analysis_errors.csv
+
 
 ```
 
@@ -126,6 +139,3 @@ As per syllabus requirements, we disclose the use of the following Deep Learning
 
 * **Source code:** This project is made available under the **[MIT License](https://github.com/ANTSKYYY/deeplearning/blob/main/LICENSE)**.
 * **Dataset:** The cleaned and augmented dataset produced for this project is made available under the **[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.fr)**. If you use this dataset, please cite this repository: *> Ti Pip Team - "Ticket Classification Data-Centric Dataset", 2026.*
-
-
-```
