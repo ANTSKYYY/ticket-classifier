@@ -1,4 +1,4 @@
-# 🎫 Automatic Customer Support Ticket Routing
+# 🎫 Automatic Customer Support Ticket Routing - Students Project
 > A robust NLP classifier (DistilBERT) achieving a **0.9178 Macro F1-score** through a Data-Centric approach, Adversarial Training, and Curriculum Learning.
 
 🚀 **Test our model live:** [Interactive Web Application (XAI)](https://antskyyy.github.io/ticket-classifier/)  
