@@ -1,7 +1,7 @@
 # 🎫 Automatic Customer Support Ticket Routing
 > A robust NLP classifier (DistilBERT) achieving a **0.9178 Macro F1-score** through a Data-Centric approach, Adversarial Training, and Curriculum Learning.
 
-🚀 **Test our model live:** [Interactive Web Application (XAI)](https://antskyyy.github.io/deeplearning/)  
+🚀 **Test our model live:** [Interactive Web Application (XAI)](https://antskyyy.github.io/ticket-classifier/)  
 ☁️ **Hugging Face Model:** [Antskyyy/ticket-classifier](https://huggingface.co/Antskyyy/ticket-classifier)
 
 ⏱️ **Hardware & Training Time:** Model trained on an APPLE M3 CPU in approximately 30 minutes.
